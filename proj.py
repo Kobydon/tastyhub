@@ -55,163 +55,171 @@ def close_connection(exception):
 
 def init_db():
     with app.app_context():
-        db = get_db()
-        cursor = db.cursor()
+        try:
+            # Connect to the database
+            db = get_db()
+            cursor = db.cursor()
+            
+            # Print statement to indicate start of table creation
+            print("Creating tables...")
 
-        # Create tables
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS approval (
-                username TEXT PRIMARY KEY NOT NULL,
-                password TEXT,
-                filename TEXT,
-                place TEXT,
-                location TEXT,
-                phone INTEGER,
-                start TEXT,
-                stop TEXT,
-                email TEXT,
-                role TEXT,
-                name TEXT
-            )
-        ''')
+            # Define table creation queries
+            table_queries = [
+                '''
+                CREATE TABLE IF NOT EXISTS approval (
+                    username TEXT PRIMARY KEY NOT NULL,
+                    password TEXT,
+                    filename TEXT,
+                    place TEXT,
+                    location TEXT,
+                    phone INTEGER,
+                    start TEXT,
+                    stop TEXT,
+                    email TEXT,
+                    role TEXT,
+                    name TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS customers (
+                    username TEXT PRIMARY KEY NOT NULL,
+                    password TEXT NOT NULL
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS feedback (
+                    place TEXT,
+                    rest TEXT,
+                    username TEXT,
+                    message TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS search (
+                    item TEXT NOT NULL,
+                    def TEXT,
+                    price INTEGER NOT NULL,
+                    category TEXT,
+                    place TEXT,
+                    rest TEXT,
+                    dish_image TEXT,
+                    company TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS managers (
+                    username TEXT PRIMARY KEY NOT NULL,
+                    password TEXT,
+                    filename TEXT,
+                    place TEXT,
+                    location TEXT,
+                    phone INTEGER,
+                    start TEXT,
+                    stop TEXT,
+                    email TEXT,
+                    role TEXT,
+                    name TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS messages (
+                    username TEXT,
+                    subject TEXT,
+                    message TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS most_ordered (
+                    place TEXT,
+                    rest TEXT,
+                    item TEXT,
+                    orders INTEGER,
+                    dish_image TEXT,
+                    price TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS notification (
+                    place TEXT,
+                    rest TEXT,
+                    message TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS rating (
+                    place TEXT NOT NULL,
+                    rest TEXT,
+                    username TEXT,
+                    stars INTEGER
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS response (
+                    username TEXT,
+                    sub TEXT,
+                    message TEXT,
+                    sender TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS reviews (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT,
+                    rest TEXT,
+                    place TEXT,
+                    date TEXT,
+                    rating INTEGER,
+                    review TEXT
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS orders (
+                    item TEXT,
+                    price INTEGER,
+                    qty INTEGER,
+                    total INTEGER,
+                    place TEXT,
+                    rest TEXT,
+                    dish_image TEXT,
+                    phone TEXT,
+                    date TEXT,
+                    status TEXT,
+                    approve TEXT,
+                    id SERIAL PRIMARY KEY
+                )
+                ''',
+                '''
+                CREATE TABLE IF NOT EXISTS promotion (
+                    id SERIAL PRIMARY KEY,
+                    fname TEXT,
+                    lastname TEXT,
+                    amount TEXT,
+                    method TEXT,
+                    username TEXT,
+                    status TEXT,
+                    filename TEXT,
+                    location TEXT,
+                    company TEXT
+                )
+                '''
+            ]
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS customers (
-                username TEXT PRIMARY KEY NOT NULL,
-                password TEXT NOT NULL
-            )
-        ''')
+            # Execute each table creation query
+            for query in table_queries:
+                cursor.execute(query)
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS feedback (
-                place TEXT,
-                rest TEXT,
-                username TEXT,
-                message TEXT
-            )
-        ''')
+            # Commit changes to the database
+            db.commit()
+            print("Tables created successfully.")
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS search (
-                item TEXT NOT NULL,
-                def TEXT, 
-                price INTEGER NOT NULL,
-                category TEXT,
-                place TEXT, 
-                rest TEXT,
-                dish_image TEXT,
-				company TEXT
-            )
-        ''')
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        
+        finally:
+            # Close the database connection
+            if db is not None:
+                db.close()
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS managers (
-                username TEXT PRIMARY KEY NOT NULL,
-                password TEXT,
-                filename TEXT,
-                place TEXT,
-                location TEXT,
-                phone INTEGER,
-                start TEXT,
-                stop TEXT,
-                email TEXT,
-                role TEXT,
-                name TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
-                username TEXT,
-                subject TEXT,
-                message TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS most_ordered (
-                place TEXT,
-                rest TEXT,
-                item TEXT,
-                orders INTEGER,
-                dish_image TEXT,
-                price TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS notification (
-                place TEXT,
-                rest TEXT,
-                message TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS rating (
-                place TEXT NOT NULL,
-                rest TEXT,
-                username TEXT,
-                stars INTEGER
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS response (
-                username TEXT,
-                sub TEXT,
-                message TEXT,
-                sender TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS reviews (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT,
-                rest TEXT,
-                place TEXT,
-                date TEXT,
-                rating INTEGER,
-                review TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS orders (
-                item TEXT,
-                price INTEGER,
-                qty INTEGER,
-                total INTEGER,
-                place TEXT,
-                rest TEXT,
-                dish_image TEXT,
-                phone TEXT,
-                date TEXT,
-                status TEXT,
-                approve TEXT,
-                id INTEGER PRIMARY KEY AUTOINCREMENT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS promotion (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                fname TEXT,
-                lastname TEXT,
-                amount TEXT,
-                method TEXT,
-                username TEXT,
-                status TEXT,
-                filename TEXT,
-                location TEXT,
-                company TEXT
-            )
-        ''')
-
-        db.commit()
-
-#homepage
 
 @app.route('/')
 def homepage():
