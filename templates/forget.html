@@ -111,14 +111,16 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
-       
-       
+        <li><a href="/home">Home</a></li>
+        <li><a href="/about">About us</a></li>
+        <li><a href="/terms">Terms</a></li>
+        <li><a href="/contact">Contact</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">Register
           <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="/manager_signup">Restaurant</a></li>
-            <li><a href="/signup_customer">Customer</a></li>
+            <li><a href="#">Customer</a></li>
         
           </ul>
         </li>
@@ -148,13 +150,13 @@
         {% endif %}
     {% endwith %}
   <h3 class="form-label" style="color: aliceblue;">Welcome Back</h3>
-  <form  enctype="multipart/form-data"  action="/manager_logged_in" method="post">
+  <form  enctype="multipart/form-data"  action="/reset_password" method="post">
   <div class="form-group">
 	<div class="input-group">
 	  <span class="input-group-addon addon-left" id="username">
 		<i class="fa fa-user fa-fw" style="color: aliceblue;"></i>
 	  </span> 
-	  <input class="form-control with-primary-addon" placeholder="User Account" type="text"  name="username" style="padding: 23px;">
+	  <input class="form-control with-primary-addon" placeholder="User Account" type="text"  name="username">
 	</div>
 
   </div>
@@ -163,12 +165,12 @@
 	  <span class="input-group-addon addon-left" id="password">
 		<i class="fa fa-lock fa-fw text-" style="color: aliceblue;"></i>
 	  </span>
-	  <input class="form-control with-primary-addon" placeholder="Password" type="password" name="password" style="padding: 23px;">
+	  <input class="form-control with-primary-addon" placeholder="New Password" type="password" name="paswword">
 	</div>
 	</div>
 
-	<a href="/forget_password" class="btn btn-link">forgot password </a>
-	<button class="btn btn-lg btn-primary" type="submit">Login
+	/* <a href="/forget_password" class="btn btn-link">forgot password </a> */
+	<button class="btn btn-lg btn-primary" type="submit">Reset
 	  <div class="spinner-border text-primary" role="status" *ngIf="load">
 		<span class="sr-only">.....</span>
 	  </div>

@@ -3,14 +3,20 @@
 <head>
 <link type="text/css" href="{{url_for('static',filename='homepage.css')}}" rel="stylesheet"/>
 
-		<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='search/css/default.css')}}" />
+		
 		<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='search/css/component.css')}}" />
 		<script src="{{url_for('static',filename='search/js/modernizr.custom.js')}}"></script>
 		
 		
 	
 		
-		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		
 <style>
 
@@ -18,6 +24,7 @@ body
 {
 	background-color:white;
 }
+
 .content{	
 			opacity:0.5;
 			background-size: contain;
@@ -98,7 +105,7 @@ background:rgba(255,255,255,0.4);
 }
 
 .crossfade > figure:nth-child(5) {
-  animation-delay: 16s;
+  animation-delay: 6s;
   background-image: url('{{url_for('static',filename='12.jpg')}}');
 }
 @keyframes 
@@ -124,7 +131,38 @@ imageAnimation
 }
 
 
-
+.navbar {
+    font-family: Montserrat, sans-serif;
+    margin-bottom: 0;
+    background-color: #2d2d30;
+    border: 0;
+    font-size: 11px !important;
+    letter-spacing: 4px;
+    opacity: 0.9;
+  }
+  .navbar li a, .navbar .navbar-brand { 
+    color: #d5d5d5 !important;
+  }
+  .navbar-nav li a:hover {
+    color: #fff !important;
+  }
+  .navbar-nav li.active a {
+    color: #fff !important;
+    background-color: #29292c !important;
+  }
+  .navbar-default .navbar-toggle {
+    border-color: transparent;
+  }
+  .open .dropdown-toggle {
+    color: #fff;
+    background-color: #555 !important;
+  }
+  .dropdown-menu li a {
+    color: #000 !important;
+  }
+  .dropdown-menu li a:hover {
+    background-color: red !important;
+  }
 /* for pop up */
 .button {
  
@@ -219,6 +257,22 @@ imageAnimation
 		background-color:rgb(245,245,245);
 	    box-shadow: 10px 10px 5px #888888;
 }
+.carousel-inner img {
+    -webkit-filter: grayscale(50%);
+    filter: grayscale(10%); /* make all photos black and white */ 
+    width: 100%; /* Set width to 100% */
+    margin: auto;
+	height: 50%;
+
+  }
+  .carousel-caption h3 {
+    color: #fff !important;
+  }
+  @media (max-width: 600px) {
+    .carousel-caption {
+      display: none; /* Hide the carousel text when the screen is less than 600 pixels wide */
+    }
+  }
 .remove_pop_a
 {
 		text-decoration:none;
@@ -314,6 +368,11 @@ if(data=='')
 		alert("enter dish to search");
 		document.form1.action="";
 	}
+
+else if(data=="Accra" || data =="Kumasi" || data =="Takoradi" || data =="kumasi" || data=="accra"){
+	
+	form.action = document.getElementById('search').value;
+}
 else
 	{
 	
@@ -324,7 +383,7 @@ else
 
 }
 </script>
-<title> LA CANTINA </title>
+<title> TastyHub </title>
 </head>
 
 
@@ -334,31 +393,71 @@ else
 <body>
 
 
-<h1>
 
-<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60">
-<span class="h1span">
-
-LA CANTINA
-</span>
-
-<span>
-
-
-<a href="/customer_logout" class="login_menu">LOGOUT</></a>
-<a href="/help" class="help">HELP</></a>
-<a href="/cartshow" class="help">CART</a>
-<a href="/orders" class="help">MY ORDERS</a>
-<a class="button" href="#popup1">MESSAGES</a>
-
-
-</span>
-</h1>
-
-
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>                        
+			</button>
+		  <h4 style="color: aliceblue;">TastyHub</h4>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav navbar-right">
+			  <li><a href="/home" class="button">Home</a></li>
+			  <li><a href="/cartshow" class="help">CART <i class="fa fa-shopping-cart"></i></a></li> 
+			<li><a href="/orders" class="help">MY ORDERS <i class="fa fa-th"></i></a></li>  
+			  
+			  <li>	<a class="button" href="#popup1">MESSAGES <i class="fa fa-envelope"></i></a></li>
+		<li>	<a href="/contact" class="button">Contact </a></li>
+		<li> <a href="/logout" class="login_menu">LOGOUT</></a></li>
+		<li><a href="/help" class="help"></a></li>
+	
+		
+			</ul>
+		  </div>
+		</div>
+	  </nav>
+	<!-- Carousel HTML -->
+<div id="myCarousel" class="carousel slide" data-ride="carousel">
+	<!-- Indicators -->
+	<ol class="carousel-indicators">
+	  {% for i in promotions %}
+		<li data-target="#myCarousel" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
+	  {% endfor %}
+	</ol>
+  
+	<!-- Wrapper for slides -->
+	<div class="carousel-inner" role="listbox">
+	  {% for x in promotions %}
+		<div class="item {% if loop.first %}active{% endif %}">
+		  <img src="{{ url_for('static', filename='restaurants/' + x[7]) }}" alt="{{ x[7] }}" width="1200" height="400">
+		  <div class="carousel-caption">
+			<h3 style="font-size: xx-large;">{{ x[9] }} - {{x[8]}}</h3>
+			<!-- <p>The atmosphere in New York is lorem ipsum.</p> -->
+		  </div>
+		</div>
+	  {% endfor %}
+	</div>
+  
+	<!-- Left and right controls -->
+	<a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+	  <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+	  <span class="sr-only">Previous</span>
+	</a>
+	<a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+	  <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+	  <span class="sr-only">Next</span>
+	</a>
+  </div>
+  
+	  <br><br><br><br><br>
 <div id="sb-search" class="sb-search">
+	
 	<form name='form1' onsubmit='required()'>
-			<input class="sb-search-input" placeholder="Enter the dish to search..." type="search " name="data" id="search">
+			<input class="sb-search-input" placeholder=" search Dishes ,Restaurant..." type="search " name="data" id="search">
 			<input class="sb-search-submit" type="submit" value="">
 			<span class="sb-icon-search"></span>
 			</form>
@@ -410,7 +509,7 @@ LA CANTINA
 
 	
 </div>
-<div class="crossfade">
+<!-- <div class="crossfade">
 
   <figure></figure>
 
@@ -420,9 +519,9 @@ LA CANTINA
 
   <figure></figure>
 
-  <figure></figure>
+  <figure></figure> -->
 
-<div class="top">
+<!-- <div class="top">
 <br>
 <br>
 <br>
@@ -433,7 +532,7 @@ LA CANTINA
 <br>
 <br>
 <span class="order1">
-“YOU DONT A NEED A SILVER FORK TO EAT GOOD FOOD” 
+“YOU DONT  NEED A SILVER FORK TO EAT GOOD FOOD” 
 </span>
 <br>
 <br>
@@ -448,9 +547,9 @@ Order food online from the best restaurants near you
 
 <select id="location" class="place" required>
   <option class="placeo" value="">None</option>
-  <option class="placeo" value="/TLY">Thalassery</option>
-  <option class="placeo" value="/KANNUR">Kannur</option>
-  <option class="placeo" value="/CALICUT">Calicut</option>
+  <option class="placeo" value="/Accra">Accra</option>
+  <option class="placeo" value="/Kumasi">Kumasi</option>
+  <option class="placeo" value="/Takoradi">Takoradi</option>
 </select>
 
 <button class="showrestaurants">FIND RESTAURANTS</button>
@@ -476,27 +575,16 @@ Order food online from the best restaurants near you
 <br>
 <br>
 </div>
-</div>
+</div> -->
 
 
-<img src="{{url_for('static',filename='kfc_homepage.png')}}" width="400" height="250" style="margin-left:50px;margin-top:10px">
+<!-- <img src="{{url_for('static',filename='kfc_homepage.png')}}" width="400" height="250" style="margin-left:50px;margin-top:10px">
 <img src="{{url_for('static',filename='pizza_homepage.jpg')}}" width="400" height="250">
 <img src="{{url_for('static',filename='baskins_homepage.jpg')}}" width="400" height="250">
-<img src="{{url_for('static',filename='robert.jpg')}}" width="" height="">
+<img src="{{url_for('static',filename='robert.jpg')}}" width="" height=""> -->
 
 <br>
 <br>
-<span class="most">MOST ORDERED<br> DISHES</span>
-
-{%for x in most_ordered%}
-<span class="container">
-
-  <a href="/quantity/{{x[0]}}/{{x[1]}}/{{x[2]}}/{{x[5]}}/{{x[4]}}"><img src="{{url_for('static',filename='dish/'+x[4])}}" alt="Avatar" class="image" style="width:250px">
-  <span class="middle">
-    <span class="text">{{x[2]}}<br>Rs.{{x[5]}}</span>
-  </span></span>
-	</a>
-{%endfor%}
 
 <img src="{{url_for('static',filename='ordering.jpg')}}" width="100%" height="450">
 
@@ -504,21 +592,7 @@ Order food online from the best restaurants near you
 
 
 <!-- menu -->
-	<nav class="nav">
-		<img class="menu_image" src="{{url_for('static',filename='food.jpg')}}"  width="70" height="70">
-		<br>
-		<span class="menu_heading">La Cantina</span>
-		<ul>
-			<li><a class="nava" href="/homepage_customer">Home</a></li>
-			<li><a class="nava" href="/about">About Us</a></li>
-			<li><a class="nava" href="/contact">Contact</a></li>
-			<li><a class="nava" href="/privacy_policy">Privacy Policy</a></li>
-			<li><a class="nava" href="/security">Security</a></li>		
-			<li><a class="nava" href="/terms">Terms</a></li>		
-
-		</ul>
-	</nav>
-
+	
 
 <div class="last" >
 <br>
@@ -530,48 +604,49 @@ We uphold the motto <span class="bullet">“making online food ordering fast and
 </b>
 
 <div class="definition">
-<br><br>
-The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
-What we have learned is that ordering food online is way easier, faster and has <br>
-less complications than calling. What makes La Cantina better than the traditional order<br>
-over the phone method?
-
-<ul class="bullet"><li><span style="color:rgb(200,200,200);">24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
-meal ahead from the best restaurants near you and avoid the rush hours</span></li>
-<li><span style="color:rgb(200,200,200);">Free to use: Browse through 4000+ restaurant menus for free</span></li>
-<li><span style="color:rgb(200,200,200);">Order food in 4 simple steps</span></li>
-<li><span style="color:rgb(200,200,200);">Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
-<li><span style="color:rgb(200,200,200);">If you prefer to pay cash on delivery in Indian Rupees, we’ve got that covered too.</span></li>
-</ul>
-</div>
-<br><hr width="90%"><br>
-<div class="services">
-<b><span class="head_right">Our Services</span></b>
-<br><br>
-Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
-team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
-La Cantina India Corporate Office is located at Kayyath Villa, Kayyath Road , Thalassery.
-</div>
-
-<br><hr width="90%"><br>
-<b><span class="head_left">Freedom of Choice </span></b><br><br>
-<div class="freedom">
-
-<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> La Cantina is just the right place for you. 
-<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
-<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
-<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
-
-<ol class="bullet"><li><span style="color:rgb(200,200,200);">Choose your city and area</span></li>
-<li><span style="color:rgb(200,200,200);">Pick one of the 10000+ restaurant</span></li>
-<li><span style="color:rgb(200,200,200);">Place your order and pay online or cash on delivery</span></li>
-<li><span style="color:rgb(200,200,200);">Enjoy the freshly prepared food delivered to you!</span></li>
-</ol>
-
-</div>
-
-<br><br>
-
-</div>
+	<br><br>
+	The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
+	What we have learned is that ordering food online is way easier, faster and has <br>
+	less complications than calling. What makes TastyHub better than the traditional order<br>
+	over the phone method?
+	
+	<ul class="bullet"><li><span style="color:rgb(200,200,200);">24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
+	meal ahead from the best restaurants near you and avoid the rush hours</span></li>
+	<li><span style="color:rgb(200,200,200);">Free to use: Browse through 4000+ restaurant menus for free</span></li>
+	<li><span style="color:rgb(200,200,200);">Order food in 4 simple steps</span></li>
+	<li><span style="color:rgb(200,200,200);">Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
+	<li><span style="color:rgb(200,200,200);">If you prefer to pay cash on delivery in Ghanaian Rupees, we’ve got that covered too.</span></li>
+	</ul>
+	</div>
+	<br><hr width="90%"><br>
+	<div class="services">
+	<b><span class="head_right">Our Services</span></b>
+	<br><br>
+	Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
+	team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
+	TastyHub Ghana Corporate Office is located at AAmusted University, Sunyani Road , Kumasi.
+	</div>
+	
+	<br><hr width="90%"><br>
+	<b><span class="head_left">Freedom of Choice </span></b><br><br>
+	<div class="freedom">
+	
+	<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> TastyHub is just the right place for you. 
+	<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
+	<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
+	<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
+	
+	<ol class="bullet"><li><span style="color:rgb(200,200,200);">Choose your city and area</span></li>
+	<li><span style="color:rgb(200,200,200);">Pick one of the 10000+ restaurant</span></li>
+	<li><span style="color:rgb(200,200,200);">Place your order and pay online or cash on delivery</span></li>
+	<li><span style="color:rgb(200,200,200);">Enjoy the freshly prepared food delivered to you!</span></li>
+	</ol>
+	
+	</div>
+	
+	<br><br>
+	
+	
+	</div>
 </body>
 </html>

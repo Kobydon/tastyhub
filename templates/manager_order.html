@@ -1,0 +1,602 @@
+<html>
+<head>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+@font-face 
+{
+ font-family:Cinzel Decorative Bold;
+ src:url("{{url_for('static',filename='fonts/CinzelDecorative-Bold.otf')}}");
+} 
+@font-face 
+{
+ font-family:Open Sans;
+ src:url("{{url_for('static',filename='fonts/OpenSans-Regular.ttf')}}");
+}
+@font-face 
+{
+ font-family:Cormorant Garamond Medium;
+ src:url("{{url_for('static',filename='fonts/CormorantGaramond-Medium.ttf')}}");
+}
+@font-face 
+{
+ font-family:Cabin;
+ src:url("{{url_for('static',filename='fonts/Cabin-Regular.ttf')}}");
+}
+.content1
+{				   
+				height: 20px;
+				background: linear-gradient(rgb(0,0,0), rgb(200,200,200));
+}
+.content2
+{
+		background-image:url({{url_for('static',filename='plate8.jpg')}});
+		background-size: cover;
+		background-attachment: fixed;         /* scroll div contents without background */
+}
+.content3					/* div outside table and inside background */
+{
+		
+		margin-left:40px;
+		background:rgba(230,230,230,0.95);
+
+}
+.content4						/* div for checkout */
+{
+		width:400px;
+		height:240px;
+		margin-left:470px;
+		background:rgba(255,255,255,1);
+		border:1px solid rgb(170,170,170);
+		border-radius:5px;
+
+}
+.free						/* your order is free delivery */
+{
+		font-size:18px;
+		color:rgb(10,140,10);
+		height:60px;
+		line-height:60px;
+		vertical-align:middle;
+		text-align:center;
+}
+.tot					/* lower part of checkout box */
+{
+		background:rgba(200,200,200,1);
+		height:180px;
+			
+		border-bottom:1px solid rgb(170,170,170);
+		border-top:1px solid rgb(170,170,170);
+		font-size:30px;
+		font-weight:900;
+		text-align:center;
+		border-bottom-left-radius:5px;
+		border-bottom-right-radius:5px;
+}
+.proceed
+{
+		text-align:center;
+		border:1px solid black;
+		width:220px;
+		margin-left:90px;
+		border-radius:5px;
+		border-color:rgb(100,100,100);
+		background-color:rgb(255,255,255);
+}
+.proceeda
+{
+		display:block;
+		text-decoration:none;
+		font-size:28px;
+		background-color:rgb(10,150,10);
+		color:white;
+
+}
+.proceeda:hover
+{
+		background-color:rgb(5,100,5);
+}
+/* .table
+{		
+		border-collapse: collapse;
+		background:rgba(230,230,230,0);
+		font-family:"Cormorant Garamond Medium";
+		
+		/* margin-left:50px; */
+		
+ */
+.heading
+{
+			font-size:20px;
+			color:rgb(10,10,150);
+			font-weight:600;
+
+}
+.mainrow
+{
+		border-top-width:1px;
+		border-top-style:solid;
+		border-top-color:rgb(170,170,170);
+		font-size:20px;
+}
+.photo
+{
+	padding:10px;
+}
+.name
+{
+	font-family:"Cabin";
+	font-weight:700;
+	font-size:22px;
+}
+.place
+{
+	font-size:16px;
+	font-weight:500;
+
+}
+.stock
+{
+		font-weight:600;
+		color:rgb(10,150,10);
+}
+.price
+{
+		font-weight:800;
+		font-family:"Times New Roman";
+		color:rgb(150,10,10);
+		font-size:22px;
+}
+.quantity
+{
+		font-weight:600;
+		color:black;
+		font-family:"Times New Roman";
+		font-size:22px;
+}
+.removea
+{
+		font-weight:600;
+		text-decoration:none;
+		
+}
+.removea:hover
+{
+		text-decoration:underline;
+
+}
+.avail
+{
+		color:rgb(150,10,10);
+		padding:5px;
+}
+.shopping
+{
+		font-size:28px;
+		font-weight:900;
+		font-family:"Cormorant Garamond Medium";
+		padding-left:15px;
+}
+
+.btn{
+	border: 1px transparent;
+        -webkit-border-radius: 40px;
+        border-radius: 40px;
+        color: #eeeeee;
+        cursor: pointer;
+        display: inline-block;
+        font-family: Arial;
+        font-size: 10px;
+        padding: 8px 30px;
+        text-align: center;
+        text-decoration: none;
+}
+
+#order {
+        border: 1px transparent;
+        -webkit-border-radius: 40px;
+        border-radius: 40px;
+        color: #eeeeee;
+        cursor: pointer;
+        display: inline-block;
+        font-family: Arial;
+        font-size: 20px;
+        padding: 8px 30px;
+        text-align: center;
+        text-decoration: none;
+        margin-left: 20px;
+        -webkit-animation: glowing 1300ms infinite;
+        -moz-animation: glowing 1300ms infinite;
+        -o-animation: glowing 1300ms infinite;
+        animation: glowing 1300ms infinite;
+      }
+      @-webkit-keyframes glowing {
+        0% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+        50% {
+          background-color: #21c7ed;
+          -webkit-box-shadow: 0 0 15px #21c7ed;
+        }
+        100% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+      }
+      @keyframes glowing {
+        0% {
+          background-color: #0091b2;
+          box-shadow: 0 0 3px #0091b2;
+        }
+        50% {
+          background-color: #21c7ed;
+          box-shadow: 0 0 15px #21c7ed;
+        }
+        100% {
+          background-color: #0091b2;
+          box-shadow: 0 0 3px #0091b2;
+        }
+      }
+      .svg-btn {
+        display: block;
+        width: 230px;
+        height: 230px;
+        margin-left: 10px;
+      }
+      svg {
+        fill: blue;
+        -webkit-animation: glowing-polygon 1300ms infinite;
+        -moz-animation: glowing-polygon 1300ms infinite;
+        -o-animation: glowing-polygon 1300ms infinite;
+        animation: glowing-polygon 1300ms infinite;
+      }
+      @-webkit-keyframes glowing-polygon {
+        0% {
+          fill: #0091b2;
+          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
+        }
+        50% {
+          fill: #21c7ed;
+          -webkit-filter: drop-shadow( 0 0 15px #21c7ed);
+        }
+        100% {
+          fill: #0091b2;
+          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
+        }
+      }
+      @keyframes glowingPolygon {
+        0% {
+          fill: #0091b2;
+          filter: drop-shadow( 0 0 3px #0091b2);
+        }
+        50% {
+          fill: #21c7ed;
+          filter: drop-shadow( 0 0 15px #21c7ed);
+        }
+        100% {
+          fill: #0091b2;
+          filter: drop-shadow( 0 0 3px #0091b2);
+        }
+      }
+	  
+#order {
+        border: 1px transparent;
+        -webkit-border-radius: 40px;
+        border-radius: 40px;
+        color: #eeeeee;
+        cursor: pointer;
+        display: inline-block;
+        font-family: Arial;
+        font-size: 20px;
+        padding: 8px 30px;
+        text-align: center;
+        text-decoration: none;
+        margin-left: 20px;
+        -webkit-animation: glowing 1300ms infinite;
+        -moz-animation: glowing 1300ms infinite;
+        -o-animation: glowing 1300ms infinite;
+        animation: glowing 1300ms infinite;
+      }
+      @-webkit-keyframes glowing {
+        0% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+        50% {
+          background-color: #21c7ed;
+          -webkit-box-shadow: 0 0 15px #21c7ed;
+        }
+        100% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+      }
+      @keyframes glowing {
+        0% {
+          background-color: #0091b2;
+          box-shadow: 0 0 3px #0091b2;
+        }
+        50% {
+          background-color: #21c7ed;
+          box-shadow: 0 0 15px #21c7ed;
+        }
+        100% {
+          background-color: #0091b2;
+          box-shadow: 0 0 3px #0091b2;
+        }
+      }
+      .svg-btn {
+        display: block;
+        width: 230px;
+        height: 230px;
+        margin-left: 10px;
+      }
+      svg {
+        fill: blue;
+        -webkit-animation: glowing-polygon 1300ms infinite;
+        -moz-animation: glowing-polygon 1300ms infinite;
+        -o-animation: glowing-polygon 1300ms infinite;
+        animation: glowing-polygon 1300ms infinite;
+      }
+      @-webkit-keyframes glowing-polygon {
+        0% {
+          fill: #0091b2;
+          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
+        }
+        50% {
+          fill: #21c7ed;
+          -webkit-filter: drop-shadow( 0 0 15px #21c7ed);
+        }
+        100% {
+          fill: #0091b2;
+          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
+        }
+      }
+      @keyframes glowingPolygon {
+        0% {
+          fill: #0091b2;
+          filter: drop-shadow( 0 0 3px #0091b2);
+        }
+        50% {
+          fill: #21c7ed;
+          filter: drop-shadow( 0 0 15px #21c7ed);
+        }
+        100% {
+          fill: #0091b2;
+          filter: drop-shadow( 0 0 3px #0091b2);
+        }
+      }
+
+      
+.navbar {
+    font-family: Montserrat, sans-serif;
+    margin-bottom: 0;
+    background-color: #2d2d30;
+    border: 0;
+    font-size: 11px !important;
+    letter-spacing: 4px;
+    opacity: 0.9;
+  }
+  .navbar li a, .navbar .navbar-brand { 
+    color: #d5d5d5 !important;
+  }
+  .navbar-nav li a:hover {
+    color: #fff !important;
+  }
+  .navbar-nav li.active a {
+    color: #fff !important;
+    background-color: #29292c !important;
+  }
+  .navbar-default .navbar-toggle {
+    border-color: transparent;
+  }
+  .open .dropdown-toggle {
+    color: #fff;
+    background-color: #555 !important;
+  }
+  .dropdown-menu li a {
+    color: #000 !important;
+  }
+  .dropdown-menu li a:hover {
+    background-color: red !important;
+  }
+</style>
+</head>
+
+<body>
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>                        
+			</button>
+      <h4 style="color: aliceblue;">TastyHub <a href="/logout">  <i class="fa fa-sign-out" ></i></a></h4>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav navbar-right">
+        <li><a href="/go_manager" class="button">Dashboard <i class="fa fa-tachometer" ></i></a></li>
+			 
+			  <li>	<a class="button" href="#popup1"> MESSAGES <i class="fa fa-envelope"></i></a></li>
+			<!-- <li><a class="button" href="#popup2">NOTIFICATIONS</a></li>   -->
+
+<li><a class="button" href="{{url_for('search_report')}}">Sales Report <i class="fa fa-file"></i></a></li>
+<!-- <li><a href="/reviews_manager/{{place}}" class="button">REVIEWS</a></li> -->
+{% if new_orders > 0 %}
+  <li> <a class="button" id="order" href="{{ url_for('m_orders') }}">Orders    <i class="fa fa-shopping-cart"></i>
+		<span style="text-align:center;background-color: lightcoral; border-radius: 50%;">{{new_orders}}</span></a></li> 
+{% else %}
+    <li><a class="button"  href="{{ url_for('m_orders') }}">Orders  <i class="fa fa-shopping-cart"></i></a></li>
+{% endif %}
+<li> <a href="/promote" class="button">Promote</li>
+	<!-- <li> <a href="/logout" class="login_menu">LOGOUT</a></li> -->
+	
+	
+		<!-- <li>	<a href="/contact">Contact</a></li> -->
+		<!-- <li> <button class="btn btn-danger "  >Logout</button> -->
+		<!-- <li><a href="/help" class="help"></a></li> -->
+	
+		
+			</ul>
+		  </div>
+		</div>
+	  </nav>
+
+<div class="content2">
+<br>
+<br>
+<br>
+<br>
+
+<div class="content3" style="width: 90%;">
+	<br>
+	<div class="shopping">
+	  Orders
+	</div>
+	
+	<table  class="table table-striped">
+	<tr >
+		<td></td>
+		<td></td>
+		<td>price</td>
+		<td>quantity</td>
+		<td>subtotal</td>
+		<td>date | time</td>
+		<td>status</td>
+		<td>action</td>
+		
+	</tr>	
+	<tr>
+	{% for x in var %}
+	
+	<tr  >
+		
+	<td rowspan='3' class="photo" ><img src="{{url_for('static',filename='dish/'+x[6])}}" height="70" width="100" onerror="this.src='{{url_for('static',filename='noimage.png')}}'"></td>
+			
+		<td class="name">{{x[0]}}</td>
+		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[1]}}</td>
+		<td class="quantity">{{x[2]}}</td>
+		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[3]}}</td>
+		<td style="font-weight: bold;">{{x[8]}}</td>
+		{% if x[10] == "Approved" %}
+		<td style="font-weight: bold; color: green;">{{ x[10] }}</td>
+	{% else %}
+		<td style="font-weight: bold; color: orangered;">{{ x[10] }}</td>
+	{% endif %}
+	
+		<td>
+			{% if x[10] == "Pending" %}
+			<a href="{{ url_for('approve_order', id=x[11]) }}"><button class="btn" style="background-color: green;">Approve</button></a>	
+			<a href="{{ url_for('cancel_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>		
+			{% elif x[10] == "Approved" %}
+				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
+				<a href="{{ url_for('cancel_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>	
+			{% else %}
+				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
+				<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
+			{% endif %}
+		</td>
+		
+	</tr>
+	<tr>
+		<td class="place">from <a href="tel:{{x[7]}}">{{x[7]}}</a>,{{x[4]}}</td>
+		
+	</tr>
+	<tr>
+
+		<!-- <td class="stock">In stock</td> -->
+	</tr>
+	</tr>	
+
+{% endfor %}
+
+</table>
+<br>
+
+<br>
+</div>
+<br>
+<br><br>
+
+	
+<br>
+
+
+<br>
+<br>
+<br>
+<br>
+
+</div>
+
+
+
+
+
+
+<!-- menu -->
+
+
+<div class="last" style="background-color:gray; color: black; text-align: center;" >
+<br>
+<div >
+We uphold the motto <span class="bullet">“making online food ordering fast and easy”</span>. Our service allows you<br> to find all of the restaurants available nearby, which can deliver to your house
+</div>
+<br><br>
+<b><span class="head_left">Ordering food is easy as ABC Only 4 steps to make the order, easy payment, available 24/7</span>
+</b>
+
+<div class="definition">
+	<br><br>
+	The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
+	What we have learned is that ordering food online is way easier, faster and has <br>
+	less complications than calling. What makes TastyHub better than the traditional order<br>
+	over the phone method?
+	
+	<ul class="bullet"><li><span >24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
+	meal ahead from the best restaurants near you and avoid the rush hours</span></li>
+	<li><span >Free to use: Browse through 4000+ restaurant menus for free</span></li>
+	<li><span >Order food in 4 simple steps</span></li>
+	<li><span >Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
+	<li><span >If you prefer to pay cash on delivery in Ghanaian Rupees, we’ve got that covered too.</span></li>
+	</ul>
+	</div>
+	<br><hr width="90%"><br>
+	<div class="services">
+	<b><span class="head_right">Our Services</span></b>
+	<br><br>
+	Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
+	team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
+	TastyHub India Corporate Office is located at AAmusted University, Sunyani Road , Kumasi.
+	</div>
+	
+	<br><hr width="90%"><br>
+	<b><span class="head_left">Freedom of Choice </span></b><br><br>
+	<div class="freedom">
+	
+	<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> TastyHub is just the right place for you. 
+	<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
+	<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
+	<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
+	
+	<ol class="bullet"><li><span >Choose your city and area</span></li>
+	<li><span >Pick one of the 10000+ restaurant</span></li>
+	<li><span >Place your order and pay online or cash on delivery</span></li>
+	<li><span >Enjoy the freshly prepared food delivered to you!</span></li>
+	</ol>
+	
+	</div>
+	
+	<br><br>
+	
+	
+	</div>
+</body>
+</html>

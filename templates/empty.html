@@ -1,51 +1,9 @@
 <html>
 <head>
-<!-- <link type="text/css" href="{{url_for('static',filename='webpages_manager.css')}}" rel="stylesheet"/> -->
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TastyHub</title>
-<meta http-equiv="refresh" content="10">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
-<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link type="text/css" href="{{url_for('static',filename='webpages_manager.css')}}" rel="stylesheet"/>
 
 <style>
 
-.navbar {
-    font-family: Montserrat, sans-serif;
-    margin-bottom: 0;
-    background-color: #2d2d30;
-    border: 0;
-    font-size: 11px !important;
-    letter-spacing: 4px;
-    opacity: 0.9;
-  }
-  .navbar li a, .navbar .navbar-brand { 
-    color: #d5d5d5 !important;
-  }
-  .navbar-nav li a:hover {
-    color: #fff !important;
-  }
-  .navbar-nav li.active a {
-    color: #fff !important;
-    background-color: #29292c !important;
-  }
-  .navbar-default .navbar-toggle {
-    border-color: transparent;
-  }
-  .open .dropdown-toggle {
-    color: #fff;
-    background-color: #555 !important;
-  }
-  .dropdown-menu li a {
-    color: #000 !important;
-  }
-  .dropdown-menu li a:hover {
-    background-color: red !important;
-  }
 .content1
 {				   
 				height: 20px;
@@ -373,163 +331,35 @@
 	color:rgb(10,120,10);
 	float:right;
 }
-
-
-
-#order {
-        border: 1px transparent;
-        -webkit-border-radius: 20px;
-        border-radius: 40px;
-        color: #eeeeee;
-        cursor: pointer;
-        display: inline-block;
-        font-family: Arial;
-        /* font-size: 20px; */
-        /* padding: 8px 30px; */
-        text-align: center;
-        text-decoration: none;
-        margin-left: 20px;
-        -webkit-animation: glowing 1300ms infinite;
-        -moz-animation: glowing 1300ms infinite;
-        -o-animation: glowing 1300ms infinite;
-        animation: glowing 1300ms infinite;
-      }
-      @-webkit-keyframes glowing {
-        0% {
-          background-color: #0091b2;
-          -webkit-box-shadow: 0 0 3px #0091b2;
-        }
-        50% {
-          background-color: #21c7ed;
-          -webkit-box-shadow: 0 0 15px #21c7ed;
-        }
-        100% {
-          background-color: #0091b2;
-          -webkit-box-shadow: 0 0 3px #0091b2;
-        }
-      }
-      @keyframes glowing {
-        0% {
-          background-color: #0091b2;
-          box-shadow: 0 0 3px #0091b2;
-        }
-        50% {
-          background-color: #21c7ed;
-          box-shadow: 0 0 15px #21c7ed;
-        }
-        100% {
-          background-color: #0091b2;
-          box-shadow: 0 0 3px #0091b2;
-        }
-      }
-      .svg-btn {
-        display: block;
-        width: 230px;
-        height: 230px;
-        margin-left: 10px;
-      }
-      svg {
-        fill: blue;
-        -webkit-animation: glowing-polygon 1300ms infinite;
-        -moz-animation: glowing-polygon 1300ms infinite;
-        -o-animation: glowing-polygon 1300ms infinite;
-        animation: glowing-polygon 1300ms infinite;
-      }
-      @-webkit-keyframes glowing-polygon {
-        0% {
-          fill: #0091b2;
-          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
-        }
-        50% {
-          fill: #21c7ed;
-          -webkit-filter: drop-shadow( 0 0 15px #21c7ed);
-        }
-        100% {
-          fill: #0091b2;
-          -webkit-filter: drop-shadow( 0 0 3px #0091b2);
-        }
-      }
-      @keyframes glowingPolygon {
-        0% {
-          fill: #0091b2;
-          filter: drop-shadow( 0 0 3px #0091b2);
-        }
-        50% {
-          fill: #21c7ed;
-          filter: drop-shadow( 0 0 15px #21c7ed);
-        }
-        100% {
-          fill: #0091b2;
-          filter: drop-shadow( 0 0 3px #0091b2);
-        }
-      }
 </style>
 </head>
 
 <body>
-	
-	<nav class="navbar navbar-default navbar-fixed-top">
-		<div class="container-fluid">
-		  <div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-			  <span class="icon-bar"></span>
-			  <span class="icon-bar"></span>
-			  <span class="icon-bar"></span>                        
-			</button>
-		  <h4 style="color: aliceblue;">TastyHub <a href="/logout">  <i class="fa fa-sign-out" ></i></a></h4>
-		  </div>
-		  <div class="collapse navbar-collapse" id="myNavbar">
-			<ul class="nav navbar-nav navbar-right">
-				<li><a href="go_manager" class="button">Dashboard <i class="fa fa-tachometer " ></i></a></li>
-			 
-			  <li>	<a class="button" href="#popup1"> MESSAGES <i class="fa fa-envelope"></i></a></li>
-			<!-- <li><a class="button" href="#popup2">NOTIFICATIONS</a></li>   -->
+<h1>
+<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60">
+<span class="h1span">
 
-<li><a class="button" href="{{url_for('search_report')}}">Sales Report <i class="fa fa-file"></i></a></li>
-<!-- <li><a href="/reviews_manager/{{place}}" class="button">REVIEWS</a></li> -->
-{% if new_orders > 0 %}
-  <li> <a class="button" id="order" href="{{ url_for('m_orders') }}">Orders    <i class="fa fa-shopping-cart"></i>
-		<span style="text-align:center;background-color: lightcoral; border-radius: 50%;">{{new_orders}}</span></a></li> 
-{% else %}
-    <li><a class="button"  href="{{ url_for('m_orders') }}">Orders  <i class="fa fa-shopping-cart"></i></a></li>
-{% endif %}
-<li> <a href="/promote" class="button">Promote</a></li>
-	<!-- <li> <a href="/logout" class="login_menu">LOGOUT</a></li> -->
-	
-	
-		<!-- <li>	<a href="/contact">Contact</a></li> -->
-		<!-- <li> <button class="btn btn-danger "  >Logout</button> -->
-		<!-- <li><a href="/help" class="help"></a></li> -->
-	
-		
-			</ul>
-		  </div>
-		</div>
-	  </nav>
+TastyHub</span>
+<span>
+<a href="/manager_logout" class="login_menu">LOGOUT</></a>
+<a href="/help" class="help">HELP</></a>
+<a class="button" href="#popup1">MESSAGES</a>
+<a class="button" href="#popup2">NOTIFICATIONS</a>
+<a class="button" href="{{url_for('m_orders')}}">Orders</a>
+<a class="button" href="{{url_for('sales_report')}}">Sales Report</a>
+<a href="/reviews_manager/{{place}}" class="help">REVIEWS</></a>
 
+
+</span>
+</h1>
 
 <div class="content2">
-	{% if new_orders > 0 %}
-	<audio id="notificationSound" src="{{ url_for('static', filename='notification/sound.mp3') }}" preload="auto" autoplay></audio>
-{% endif %}
 <br>
 <br>
-<br><br><br><br>
-<br><br><br><br><br><br><br>
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-	{% for category, message in messages %}
-		<div class="alert alert-{{ category }}">
-			{{ message }}
-		</div>
-	{% endfor %}
-{% endif %}
-{% endwith %}
+<br>
 <div class="sort">
-	
 <img class="image_rest" src="{{url_for('static',filename='restaurants/'+ var1[2])}}" width="180" height="180" alt="">
 <div class="rest">
-
 	<span class="head">{{var1[0]}}</span><br>
 	Location : {{var1[4]}}<br>
 	&phone; :<span> {{var1[5]}}</span><br>
@@ -620,32 +450,41 @@ EDIT PRICE
 
 
 
-<div class="content3">
-	
-	{% for x in var %}
+<div class="content3" style="text-align: center;">
+    <form action="{{url_for('search_report')}}",method="post">
+    <input type="date" name="date">
+    <button type="submit" style="background-color: #06D85F;">Generate Report</button>
+</form>
+
 	<!--displays menu of different restaurants -->
 
-	<div class="food">
-	<div class="name">
-		<img src="{{url_for('static',filename='dish/'+x[4])}}" height="150" width="250">
+	<div class="report" >
+
+	<table style="border: 1px solid gray; border-collapse: collapse;">
+      <thead>
+        <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>quantity</th>
+        <th>Total</th>
+    </tr>
+      </thead>
+      <tbody>
+        <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+      </tbody>
+      
+     
+    </table>
+
 	</div>
 
-	<div class="price">
-		{{x[0]}}
-	 	</div>
-
-	<div class="desc">
-	{{x[1]}} 
-	</div>		
-	&nbsp;&nbsp;GH₵
-
-	<span class="money">
-	{{x[2]}}
-	</span>
-	</div>
 
 
-{% endfor %}
 </div>
 
 <br>
@@ -661,7 +500,77 @@ EDIT PRICE
 
 
 
+<!-- menu -->
+	<nav>
+		<img class="menu_image" src="{{url_for('static',filename='food.jpg')}}"  width="70" height="70">
+		<br>
+		<span class="menu_heading">TastyHub</span>
+		<ul>
+			<li><a class="nava" href="/manager_homepage/{{place}}">Home</a></li>
+			<li><a class="nava" href="/about">About Us</a></li>
+			<li><a class="nava" href="/contact">Contact</a></li>
+			<li><a class="nava" href="/privacy_policy">Privacy Policy</a></li>
+			<li><a class="nava" href="/security">Security</a></li>	
+			<li><a class="nava" href="/terms">Terms</a></li>		
+			
+		</ul>
+	</nav>
 
 
+
+<div class="last" >
+<br>
+<div class="motto">
+We still uphold the same motto <span class="bullet">“making online food ordering fast and easy”</span>. Our service allows you<br> to find all of the restaurants available nearby, which can deliver to your house
+</div>
+<br><br>
+<b><span class="head_left">Ordering food is easy as ABC Only 4 steps to make the order, easy payment, available 24/7</span>
+</b>
+
+<div class="definition">
+	<br><br>
+	The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
+	What we have learned is that ordering food online is way easier, faster and has <br>
+	less complications than calling. What makes TastyHub better than the traditional order<br>
+	over the phone method?
+	
+	<ul class="bullet"><li><span style="color:rgb(200,200,200);">24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
+	meal ahead from the best restaurants near you and avoid the rush hours</span></li>
+	<li><span style="color:rgb(200,200,200);">Free to use: Browse through 4000+ restaurant menus for free</span></li>
+	<li><span style="color:rgb(200,200,200);">Order food in 4 simple steps</span></li>
+	<li><span style="color:rgb(200,200,200);">Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
+	<li><span style="color:rgb(200,200,200);">If you prefer to pay cash on delivery in Ghanaian Rupees, we’ve got that covered too.</span></li>
+	</ul>
+	</div>
+	<br><hr width="90%"><br>
+	<div class="services">
+	<b><span class="head_right">Our Services</span></b>
+	<br><br>
+	Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
+	team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
+	TastyHub Ghana Corporate Office is located at AAmusted University, Sunyani Road , Kumasi.
+	</div>
+	
+	<br><hr width="90%"><br>
+	<b><span class="head_left">Freedom of Choice </span></b><br><br>
+	<div class="freedom">
+	
+	<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> TastyHub is just the right place for you. 
+	<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
+	<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
+	<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
+	
+	<ol class="bullet"><li><span style="color:rgb(200,200,200);">Choose your city and area</span></li>
+	<li><span style="color:rgb(200,200,200);">Pick one of the 10000+ restaurant</span></li>
+	<li><span style="color:rgb(200,200,200);">Place your order and pay online or cash on delivery</span></li>
+	<li><span style="color:rgb(200,200,200);">Enjoy the freshly prepared food delivered to you!</span></li>
+	</ol>
+	
+	</div>
+	
+	<br><br>
+	
+	
+	</div>
 </body>
 </html>

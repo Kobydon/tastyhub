@@ -1,8 +1,13 @@
 <html>
 <head>
-<link type="text/css" href="{{url_for('static',filename='webpages.css')}}" rel="stylesheet"/>
-<link type="text/css" href="{{url_for('static',filename='hover.css')}}" rel="stylesheet"/>
-
+<!-- <link type="text/css" href="{{url_for('static',filename='webpages.css')}}" rel="stylesheet"/> -->
+<!-- <link type="text/css" href="{{url_for('static',filename='hover.css')}}" rel="stylesheet"/> -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 
 
@@ -181,6 +186,39 @@ td
 
 }
 
+.navbar {
+    font-family: Montserrat, sans-serif;
+    margin-bottom: 0;
+    background-color: #2d2d30;
+    border: 0;
+    font-size: 11px !important;
+    letter-spacing: 4px;
+    opacity: 0.9;
+  }
+  .navbar li a, .navbar .navbar-brand { 
+    color: #d5d5d5 !important;
+  }
+  .navbar-nav li a:hover {
+    color: #fff !important;
+  }
+  .navbar-nav li.active a {
+    color: #fff !important;
+    background-color: #29292c !important;
+  }
+  .navbar-default .navbar-toggle {
+    border-color: transparent;
+  }
+  .open .dropdown-toggle {
+    color: #fff;
+    background-color: #555 !important;
+  }
+  .dropdown-menu li a {
+    color: #000 !important;
+  }
+  .dropdown-menu li a:hover {
+    background-color: red !important;
+  }
+
 .sorta
 {
 		font-size:20px;
@@ -201,23 +239,41 @@ td
 		padding:5px;
 
 }
+
+
+
+
+
 </style>
 </head>
 <body>
-<h1>
-<a href="/homepage_customer">
-<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60"></a>
-<span class="h1span">
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>                        
+			</button>
+		  <h4 style="color: aliceblue;">TastyHub</h4>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav navbar-right">
+			  <li><a href="/homepage_customer" class="button">Home</a></li>
+			  <li><a href="/cartshow" class="help"><i class="fa fa-cart"></i>  CART</a></li> 
+			<li><a href="/orders" class="help">MY ORDERS</a></li>  
+			  
+			  <li>	<a class="button" href="#popup1">MESSAGES</a></li>
+		<li>	<a href="/contact" class="button">Contact</a></li>
+		<li> <a href="/logout" class="login_menu">LOGOUT</></a></li>
+		<li><a href="/help" class="help"></a></li>
+	
+		
+			</ul>
+		  </div>
+		</div>
+	  </nav>
 
-LA CANTINA</span>
-<span>
-<a href="/customer_logout" class="login">LOGOUT</></a>
-<a href="/help" class="help">HELP</></a>
-<a href="/cartshow" class="help">CART</a>
-<a href="/orders" class="help">MY ORDERS</a>
-
-</span>
-</h1>
 
 <div class="background" style="padding-left:20px; background-image:url({{url_for('static',filename='bread.jpg')}});">
 
@@ -262,13 +318,13 @@ LA CANTINA</span>
 	<br>
 	<span class="heading_dish">{{x[0]}}</span>
 	<span class="price">
-		&#8377;
+		GH₵ 
 		{{x[2]}}
 	</span>
 	<br>
 	<span class="defen">{{x[1]}}</span>
 	<br>
-	{{x[5]}}
+	{{x[7]}}
 	<br>
 	{{x[4]}}
 	<br>
@@ -352,10 +408,10 @@ Rating  &nbsp;&nbsp;&nbsp;  : <span style="font-family:'Times New Roman';font-si
 
 
 <!-- menu -->
-	<nav>
+	<!-- <nav>
 		<img class="menu_image" src="{{url_for('static',filename='food.jpg')}}"  width="70" height="70">
 		<br>
-		<span class="menu_heading">La Cantina</span>
+		<span class="menu_heading">TastyHub</span>
 		<ul>
 			<li><a class="nava" href="/homepage_customer">Home</a></li>
 			<li><a class="nava" href="/about">About Us</a></li>
@@ -365,11 +421,11 @@ Rating  &nbsp;&nbsp;&nbsp;  : <span style="font-family:'Times New Roman';font-si
 			<li><a class="nava" href="/terms">Terms</a></li>		
 			
 		</ul>
-	</nav>
+	</nav> -->
 
 
 
-<div class="last" >
+<div class="last"  style="background-color: #000;color: #fff;">
 <br>
 <div class="motto">
 We still uphold the same motto <span class="bullet">“making online food ordering fast and easy”</span>. Our service allows you<br> to find all of the restaurants available nearby, which can deliver to your house
@@ -379,49 +435,50 @@ We still uphold the same motto <span class="bullet">“making online food orderi
 </b>
 
 <div class="definition">
-<br><br>
-The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
-What we have learned is that ordering food online is way easier, faster and has <br>
-less complications than calling. What makes La Cantina better than the traditional order<br>
-over the phone method?
+	<br><br>
+	The <span class="bullet">challenge</span> for us is to make a versatile website that is simple and easy to use.<br>
+	What we have learned is that ordering food online is way easier, faster and has <br>
+	less complications than calling. What makes TastyHub better than the traditional order<br>
+	over the phone method?
+	
+	<ul class="bullet"><li><span style="color:rgb(200,200,200);">24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
+	meal ahead from the best restaurants near you and avoid the rush hours</span></li>
+	<li><span style="color:rgb(200,200,200);">Free to use: Browse through 4000+ restaurant menus for free</span></li>
+	<li><span style="color:rgb(200,200,200);">Order food in 4 simple steps</span></li>
+	<li><span style="color:rgb(200,200,200);">Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
+	<li><span style="color:rgb(200,200,200);">If you prefer to pay cash on delivery in Ghanaian Rupees, we’ve got that covered too.</span></li>
+	</ul>
+	</div>
+	<br><hr width="90%"><br>
+	<div class="services">
+	<b><span class="head_right">Our Services</span></b>
+	<br><br>
+	Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
+	team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
+	TastyHub India Corporate Office is located at AAmusted University, Sunyani Road , Kumasi.
+	</div>
+	
+	<br><hr width="90%"><br>
+	<b><span class="head_left">Freedom of Choice </span></b><br><br>
+	<div class="freedom">
+	
+	<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> TastyHub is just the right place for you. 
+	<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
+	<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
+	<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
+	
+	<ol class="bullet"><li><span style="color:rgb(200,200,200);">Choose your city and area</span></li>
+	<li><span style="color:rgb(200,200,200);">Pick one of the 10000+ restaurant</span></li>
+	<li><span style="color:rgb(200,200,200);">Place your order and pay online or cash on delivery</span></li>
+	<li><span style="color:rgb(200,200,200);">Enjoy the freshly prepared food delivered to you!</span></li>
+	</ol>
+	
+	</div>
+	
+	<br><br>
+	
+	
+	</div>
 
-<ul class="bullet"><li><span style="color:rgb(200,200,200);">24/7: Our site and app are available 24/7 with the feature to pre-order. You can plan your <br>
-meal ahead from the best restaurants near you and avoid the rush hours</span></li>
-<li><span style="color:rgb(200,200,200);">Free to use: Browse through 4000+ restaurant menus for free</span></li>
-<li><span style="color:rgb(200,200,200);">Order food in 4 simple steps</span></li>
-<li><span style="color:rgb(200,200,200);">Easy Payment: Do you prefer online payment? We accept all major credit cards as well as</li>
-<li><span style="color:rgb(200,200,200);">If you prefer to pay cash on delivery in Indian Rupees, we’ve got that covered too.</span></li>
-</ul>
-</div>
-<br><hr width="90%"><br>
-<div class="services">
-<b><span class="head_right">Our Services</span></b>
-<br><br>
-Should you have any concerns or would you want to give us feedback, please do not hesitate to contact our customer service
-team by using our Live Chat feature on your LaCantina App or website, or by sending an email at customercare@lacantina.in. 
-La Cantina India Corporate Office is located at Kayyath Villa, Kayyath Road , Thalassery.
-</div>
-
-<br><hr width="90%"><br>
-<b><span class="head_left">Freedom of Choice </span></b><br><br>
-<div class="freedom">
-
-<span class="bullet">Breakfast, Lunch, Dinner or Late Night delivery</span> La Cantina is just the right place for you. 
-<br>Simply pick one of the thousands of diverse restaurants available near you. From traditional meals to
-<br>well-known fast food chains like Dominos, Pizza Hut and Box8 along with delicate cuisines such
-<br> as Japanese, Biryani or Punjabi - you can find it all! All it takes is 4 easy steps:
-
-<ol class="bullet"><li><span style="color:rgb(200,200,200);">Choose your city and area</span></li>
-<li><span style="color:rgb(200,200,200);">Pick one of the 10000+ restaurant</span></li>
-<li><span style="color:rgb(200,200,200);">Place your order and pay online or cash on delivery</span></li>
-<li><span style="color:rgb(200,200,200);">Enjoy the freshly prepared food delivered to you!</span></li>
-</ol>
-
-</div>
-
-<br><br>
-
-
-</div>
 </body>
 </html>

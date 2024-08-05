@@ -1,0 +1,299 @@
+<html>
+<head>
+<link type="text/css" href="{{url_for('static',filename='webpages.css')}}" rel="stylesheet"/>
+
+<script type="text/javascript" src="{{url_for('static',filename='alert/alertify.min.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static',filename='alert/alertify.default.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='alert/alertify.core.css')}}">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<!-- <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css"> -->
+<!-- <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css"> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<style>
+
+ul.tab {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+	
+}
+
+/* Float the list items side by side */
+ul.tab li {float: left;}
+
+/* Style the links inside the list items */
+ul.tab li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of links on hover */
+ul.tab li a:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+ul.tab li a:focus, .active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    animation: fadeEffect 2s;
+}
+/* Fade in tabs */
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+#manage
+{
+	background-color:rgb(250,250,250);
+}
+.content2
+{
+			margin-left:50px;
+			margin-right:170px;
+			background:rgba(255,255,255,0.2);   /* to reduce opacity without effecting inner contents*/
+}
+.heading
+{
+		font-family:"Code Bold";
+		padding:25px;
+		color:black;
+		font-size:28px;
+		
+}
+.box
+{
+		border-style:solid;
+		border-width:1px;
+		border-color:rgb(245,245,245);
+		margin-right:20px;
+		margin-top:20px;
+		height:"";
+		max-height:"";
+		vertical-align:top;
+		display:inline-block;
+		font-family:"Cormorant Garamond Medium";
+		font-weight:bold;
+		font-size:19px;
+		padding:5px;
+		background-color:rgb(245,245,245);
+	    box-shadow: 10px 10px 5px #888888;
+		width:250px;
+}
+.image
+{
+		 display: block;
+		margin-left: auto;
+		margin-right: auto			/* to diplay in center horizontally*/
+}
+.message_content
+{
+		
+		border-style:solid;
+		border-width:1px;
+		border-color:rgb(245,245,245);
+		margin-right:20px;
+		font-family:"Cormorant Garamond Medium";
+		font-weight:bold;
+		font-size:19px;
+		width:80%;
+		padding-bottom:25px;
+		padding-right:5px;
+		padding-left:10px;
+		background-color:rgb(245,245,245);
+	    box-shadow: 10px 10px 5px #888888;
+}
+.removea
+{
+		text-decoration:none;
+		color:rgb(150,10,10);
+		float:right;
+		
+}
+.remove_rest_a
+{
+		text-decoration:none;
+		color:rgb(150,10,10);
+}
+
+.no
+{
+		font-size:20px;
+		font-family:"Cormorant Garamond Medium";
+
+}
+.notify
+{
+		text-decoration:none;
+		color:rgb(10,120,10);
+		float:right;
+}
+.replya
+{
+	text-decoration:none;
+	color:rgb(10,120,10);
+	float:left;
+}
+	
+</style>
+
+<script>
+document.getElementsByClassName('tablinks')[0].click();
+
+function func(evt, variable) 
+{
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(variable).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+
+
+</script>
+<body>
+
+<h1>
+
+<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60">
+<span class="h1span">
+
+TastyHub
+</span>
+
+<span>
+<a href="/admin_review" class="help_admin">REVIEWS</a>
+<a href="/help" class="help">HELP</a>
+</span>
+</h1>
+
+
+
+
+
+
+<ul class="tab">
+  <li><a href="javascript:void(0)" class="tablinks" onclick="func(event, 'requests')">requests</a></li>
+  <li><a href="javascript:void(0)" class="tablinks" onclick="func(event, 'messages')">messages</a></li>
+  <li><a href="javascript:void(0)" class="tablinks" onclick="func(event, 'manage')">manage</a></li>
+  <li><a href="/advert" class="tablinks" >Advertisement</a></li>
+
+</ul>
+
+<div id="requests" class="tabcontent">
+</div>
+
+
+<!-- menu -->
+	<nav>
+		<img class="menu_image" src="{{url_for('static',filename='food.jpg')}}"  width="70" height="70">
+		<br>
+		<span class="menu_heading">TastyHub</span>
+		<ul>
+			<li><a class="nava" href="/">Home</a></li>
+			<li><a class="nava" href="/about">About Us</a></li>
+			<li><a class="nava" href="/contact">Contact</a></li>
+			<li><a class="nava" href="/privacy_policy">Privacy Policy</a></li>
+			<li><a class="nava" href="/security">Security</a></li>		
+			<li><a class="nava" href="/terms">Terms</a></li>		
+
+		</ul>
+	</nav> <br><br><br><br><br>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Amount </th>
+            <th>Method</th>
+            <th>Company</th>
+
+            <th>Action</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr style="border: 1px solid black; border-collapse: collapse;">
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[9] }}</td>
+            <td>
+                {% if row[6] == "0" %}
+                    <a href="{{ url_for('approve_advert', id=row[0]) }}">
+                        <button class="btn btn-success">Approve</button>
+                    </a>
+                {% elif row[6] == "1" %}
+                    <a href="{{ url_for('cancel_advert', id=row[0]) }}">
+                        <button class="btn btn-danger">Cancel</button>
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        
+    </tbody>
+</table>
+
+
+
+<!-- <table >
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>John</td>
+        <td>Doe</td>
+        <td>john@example.com</td>
+      </tr>
+      <tr>
+        <td>Mary</td>
+        <td>Moe</td>
+        <td>mary@example.com</td>
+      </tr>
+      <tr>
+        <td>July</td>
+        <td>Dooley</td>
+        <td>july@example.com</td>
+      </tr>
+    </tbody>
+  </table> -->
+</body>
+</html>
