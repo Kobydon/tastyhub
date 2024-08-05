@@ -1347,16 +1347,9 @@ def manager_login():
 
 @app.route('/manager_signup')
 def manager_signup():
-    conn = get_db_connection()
-    cur = conn.cursor()
+   
     
-    cur.execute("SELECT username, place FROM managers")
-    managers = cur.fetchall()
-    cur.execute("SELECT username, place FROM approval")
-    approvals = cur.fetchall()
-    
-    conn.close()
-    return render_template('manager_signup.html', var=managers, approval=approvals)
+    return render_template('manager_signup.html')
 
 @app.route('/manager_signed_up', methods=['GET', 'POST'])
 def manager_signed_up():
