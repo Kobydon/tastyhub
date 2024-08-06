@@ -436,10 +436,7 @@ def customer_signed_up():
     conn.close()
     
     return redirect(url_for('homepage_customer'))
-from flask import Flask, render_template, request, redirect, url_for, session
-import psycopg2
-from psycopg2 import sql
-import collections
+
 
  # Replace with your actual secret key
 
@@ -708,7 +705,7 @@ def location(place):
         cur.close()
         conn.close()
     
-    return render_template('locations.html', location=place, dict=dict)
+    return render_template('restaurants.html', location=place, dict=dict)
 
 
 #to access different menus of restaurants
