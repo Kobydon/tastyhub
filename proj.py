@@ -4,18 +4,17 @@ import sys
 import cgi, os
 import cgitb; cgitb.enable()
 from werkzeug.utils import secure_filename
-import re
+
 from flask_mail import Mail, Message
 import time
 from datetime import datetime
 import collections
-from psycopg2 import sql
 
 from flask import g
 import sqlite3
 app = Flask(__name__)
 app.secret_key = 'any random string'
-# app.config['DATABASE'] = 'members.db'
+app.config['DATABASE'] = 'members.db'
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -24,27 +23,15 @@ app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'jxkalmhefacbuk@gmail.com'
 app.config['MAIL_PASSWORD'] ='qhsf mguh pzuh dcmx'  # or use an app-specific password
 app.config['MAIL_DEFAULT_SENDER'] = 'jxkalmhefacbuk@gmail.com'
-app.config['UPLOAD_FOLDER_REST'] = 'static/restaurants/'
-app.config['UPLOAD_FOLDER_DISH'] = 'static/dish/'
 
-import psycopg2
 mail = Mail(app)
 # Gmail SMTP configuration
-
-
-
 
 
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = psycopg2.connect(
-            dbname='tastyh',
-            user='tastyh_user',
-            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-            port='5432'  # Default PostgreSQL port, change if necessary
-        )
+        db = g._database = sqlite3.connect(app.config['DATABASE'])
     return db
 
 @app.teardown_appcontext
@@ -55,1009 +42,1193 @@ def close_connection(exception):
 
 def init_db():
     with app.app_context():
-        try:
-            # Connect to the database
-            db = get_db()
-            cursor = db.cursor()
-            
-            # Print statement to indicate start of table creation
-            print("Creating tables...")
+        db = get_db()
+        cursor = db.cursor()
 
-            # Define table creation queries
-            table_queries = [
-                '''
-                CREATE TABLE IF NOT EXISTS approval (
-                    username TEXT PRIMARY KEY NOT NULL,
-                    password TEXT,
-                    filename TEXT,
-                    place TEXT,
-                    location TEXT,
-                    phone INTEGER,
-                    start TEXT,
-                    stop TEXT,
-                    email TEXT,
-                    role TEXT,
-                    name TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS customers (
-                    username TEXT PRIMARY KEY NOT NULL,
-                    password TEXT NOT NULL
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS feedback (
-                    place TEXT,
-                    rest TEXT,
-                    username TEXT,
-                    message TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS search (
-                    item TEXT NOT NULL,
-                    def TEXT,
-                    price INTEGER NOT NULL,
-                    category TEXT,
-                    place TEXT,
-                    rest TEXT,
-                    dish_image TEXT,
-                    company TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS managers (
-                    username TEXT PRIMARY KEY NOT NULL,
-                    password TEXT,
-                    filename TEXT,
-                    place TEXT,
-                    location TEXT,
-                    phone INTEGER,
-                    start TEXT,
-                    stop TEXT,
-                    email TEXT,
-                    role TEXT,
-                    name TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS messages (
-                    username TEXT,
-                    subject TEXT,
-                    message TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS most_ordered (
-                    place TEXT,
-                    rest TEXT,
-                    item TEXT,
-                    orders INTEGER,
-                    dish_image TEXT,
-                    price TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS notification (
-                    place TEXT,
-                    rest TEXT,
-                    message TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS rating (
-                    place TEXT NOT NULL,
-                    rest TEXT,
-                    username TEXT,
-                    stars INTEGER
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS response (
-                    username TEXT,
-                    sub TEXT,
-                    message TEXT,
-                    sender TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS reviews (
-                    id SERIAL PRIMARY KEY,
-                    username TEXT,
-                    rest TEXT,
-                    place TEXT,
-                    date TEXT,
-                    rating INTEGER,
-                    review TEXT
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS orders (
-                    item TEXT,
-                    price INTEGER,
-                    qty INTEGER,
-                    total INTEGER,
-                    place TEXT,
-                    rest TEXT,
-                    dish_image TEXT,
-                    phone TEXT,
-                    date TEXT,
-                    status TEXT,
-                    approve TEXT,
-                    id SERIAL PRIMARY KEY
-                )
-                ''',
-                '''
-                CREATE TABLE IF NOT EXISTS promotion (
-                    id SERIAL PRIMARY KEY,
-                    fname TEXT,
-                    lastname TEXT,
-                    amount TEXT,
-                    method TEXT,
-                    username TEXT,
-                    status TEXT,
-                    filename TEXT,
-                    location TEXT,
-                    company TEXT
-                )
-                '''
-            ]
+        # Create tables
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS approval (
+                username TEXT PRIMARY KEY NOT NULL,
+                password TEXT,
+                filename TEXT,
+                place TEXT,
+                location TEXT,
+                phone INTEGER,
+                start TEXT,
+                stop TEXT,
+                email TEXT,
+                role TEXT,
+                name TEXT
+            )
+        ''')
 
-            # Execute each table creation query
-            for query in table_queries:
-                cursor.execute(query)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS customers (
+                username TEXT PRIMARY KEY NOT NULL,
+                password TEXT NOT NULL
+            )
+        ''')
 
-            # Commit changes to the database
-            db.commit()
-            print("Tables created successfully.")
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedback (
+                place TEXT,
+                rest TEXT,
+                username TEXT,
+                message TEXT
+            )
+        ''')
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        
-        finally:
-            # Close the database connection
-            if db is not None:
-                db.close()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS search (
+                item TEXT NOT NULL,
+                def TEXT, 
+                price INTEGER NOT NULL,
+                category TEXT,
+                place TEXT, 
+                rest TEXT,
+                dish_image TEXT,
+				company TEXT
+            )
+        ''')
 
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS managers (
+                username TEXT PRIMARY KEY NOT NULL,
+                password TEXT,
+                filename TEXT,
+                place TEXT,
+                location TEXT,
+                phone INTEGER,
+                start TEXT,
+                stop TEXT,
+                email TEXT,
+                role TEXT,
+                name TEXT
+            )
+        ''')
 
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                username TEXT,
+                subject TEXT,
+                message TEXT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS most_ordered (
+                place TEXT,
+                rest TEXT,
+                item TEXT,
+                orders INTEGER,
+                dish_image TEXT,
+                price TEXT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS notification (
+                place TEXT,
+                rest TEXT,
+                message TEXT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS rating (
+                place TEXT NOT NULL,
+                rest TEXT,
+                username TEXT,
+                stars INTEGER
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS response (
+                username TEXT,
+                sub TEXT,
+                message TEXT,
+                sender TEXT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                rest TEXT,
+                place TEXT,
+                date TEXT,
+                rating INTEGER,
+                review TEXT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS orders (
+                item TEXT,
+                price INTEGER,
+                qty INTEGER,
+                total INTEGER,
+                place TEXT,
+                rest TEXT,
+                dish_image TEXT,
+                phone TEXT,
+                date TEXT,
+                status TEXT,
+                approve TEXT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS promotion (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fname TEXT,
+                lastname TEXT,
+                amount TEXT,
+                method TEXT,
+                username TEXT,
+                status TEXT,
+                filename TEXT,
+                location TEXT,
+                company TEXT
+            )
+        ''')
+
+        db.commit()
+
+#homepage
 @app.route('/')
 def homepage():
     """Render the homepage based on the user's session status."""
+    
+    # Check if the user is logged in and if their username is not 'admin11'
     if 'username' in session and session["username"] != "admin11":
-        conn = get_db()
+        # Connect to the database
+        conn = connect_db()
         cur = conn.cursor()
+        
+        # Fetch active promotions for customers
         cur.execute("SELECT * FROM promotion WHERE status='1'")
         promotions = cur.fetchall()
         conn.close()
+        
+        # Render the customer homepage with promotions
         return render_template('homepage_customer.html', promotions=promotions)
+    
+    # Render the admin or general homepage if not a customer
     return render_template('homepage.html')
 
 @app.route("/logout")
 def logout():
-    session.pop("username", None)
+    session.pop("username", None)  # Remove 'username' from session, default to None if it doesn't exist
     return redirect(url_for("homepage"))
+
 
 @app.route('/privacy_policy')
 def privacy_policy():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('privacy_policy.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('privacy_policy.html',path=path)
 
 @app.route('/terms')
 def terms():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('terms.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('terms.html',path=path)
+
 
 @app.route('/about')
 def about():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('about.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('about.html',path=path)
+
 
 @app.route('/security')
 def security():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('security.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('security.html',path=path)
+
+
 
 @app.route('/help')
 def help():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('help.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('help.html',path=path)
+
+
 
 @app.route('/contact')
 def contact():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-    
-    return render_template('contact.html', path=path)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+	return render_template('contact.html',path=path)
+
 
 @app.route('/contact_form')
 def contact_form():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    varc = cur.fetchall()
-    cur.execute("SELECT * FROM managers")
-    varm = cur.fetchall()
-    conn.close()
-    
-    path = '/'
-    temp = "unknown"
-    if 'username' in session:
-        username = session['username']
-        if any(username == x[0] for x in varc):
-            path = '/homepage_customer'
-            temp = "customer"
-        elif any(username == x[0] for x in varm):
-            path = f'/manager_homepage/{next(x[3] for x in varm if username == x[0])}'
-            temp = x[3]
-    
-    return render_template('contact_form.html', path=path, temp=temp)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	varc=cur.fetchall()
+	cur.execute("SELECT * FROM managers")
+	varm=cur.fetchall()
+	conn.close()	
+	if not session:
+		path='/'
+		temp="unknown"
+	else:
+		for x in varc:
+			if session['username']==x[0]:
+				path='/homepage_customer'
+				temp="customer"
+		for x in varm:
+			if session['username']==x[0]:
+				path='/manager_homepage/'+x[3]
+				temp=x[3]
+	return render_template('contact_form.html',path=path,temp=temp)
 
-@app.route('/contact_form_submitted/<temp>', methods=['GET', 'POST'])
+
+@app.route('/contact_form_submitted/<temp>',methods=['GET','POST'])
 def contact_form_submitted(temp):
-    subject = request.form['subject']
-    message = request.form['message']
-    conn = get_db()
-    cur = conn.cursor()
-    
-    if 'username' in session:
-        username = session['username']
-    else:
-        username = 'unknown'
-    
-    cur.execute("INSERT INTO messages(username, subject, message) VALUES (%s, %s, %s)", (username, subject, message))
-    conn.commit()
-    conn.close()
-    
-    if temp == 'unknown':
-        return redirect(url_for('homepage'))
-    elif temp == 'customer':
-        return redirect(url_for('homepage_customer'))
-    else:
-        return redirect(url_for('manager_homepage', place=temp))
+	subject=request.form['subject']
+	message=request.form['message']
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	if not session:
+		cur.execute("INSERT INTO messages(username,subject,message) VALUES(?,?,?)",('unknown',subject,message,))
+	else:
+		cur.execute("INSERT INTO messages(username,subject,message) VALUES(?,?,?)",(session['username'],subject,message,))
+	conn.commit()
+	conn.close()
+	if(temp =='unknown'):
+		return redirect(url_for('homepage'))
+	elif(temp=='customer'):
+		return redirect(url_for('homepage_customer'))	
+	else:
+		return redirect(url_for('manager_homepage',place=temp))	
+
+
+
+
 
 @app.route("/signup_customer")
-def signup_customer():
-    return render_template('customer_signup.html')
+def  signup_customer():
+	return render_template('customer_signup.html')
 
+
+
+#page for displaying login for customers
 @app.route('/customer')
 def customer():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM customers")
-    var = cur.fetchall()
-    conn.close()
-    return render_template('customer.html', var=var)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM customers")
+	var=cur.fetchall()
+	conn.close()
+	return render_template('customer.html',var=var)
+	#from customer.html , goes to homepage_customer()
 
-
-
-@app.route('/customer_logged_in', methods=['GET', 'POST'])
+#customer session is created after log in
+@app.route('/customer_logged_in',methods=['GET','POST'])
 def customer_logged_in():
-    session['username'] = request.form['username']
-    return redirect(url_for('homepage_customer'))
+	session['username']=request.form['username']              #session is a dictionery with username its key.. value is nm variable
+	return redirect(url_for('homepage_customer'))
 
-
-
-
-
-
-
-
-from flask import Flask, request, session, redirect, url_for
-import psycopg2
-import re
-
-
-
-def safe_table_name(name):
-    """Sanitize the table name to ensure it follows PostgreSQL naming rules."""
-    # Replace non-alphanumeric characters with underscores
-    # Ensure the name does not start with a digit
-    sanitized_name = re.sub(r'\W|^(?=\d)', '_', name)
-    if sanitized_name[0].isdigit():
-        sanitized_name = '_' + sanitized_name
-    return sanitized_name
-
-
-def get_db():
-    return psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-@app.route('/customer_signed_up', methods=['GET', 'POST'])
+#customer session created after sign up
+@app.route('/customer_signed_up',methods=['GET','POST'])
 def customer_signed_up():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        # Save username to session
-        session['username'] = username
-        
-        conn = None
-        try:
-            conn = get_db()
-            cur = conn.cursor()
-            
-            # Insert into customers table
-            cur.execute("INSERT INTO customers (username, password) VALUES (%s, %s)", (username, password))
-            
-            # Sanitize table names
-            sanitized_username = safe_table_name(username)
-            orders_table_name = f"{sanitized_username}_orders"
-            
-            # Create tables with sanitized names
-            cur.execute(f"""
-                CREATE TABLE IF NOT EXISTS {sanitized_username} (
-                    item TEXT NOT NULL,
-                    price INTEGER,
-                    qty TEXT,
-                    total INTEGER,
-                    place TEXT,
-                    rest TEXT,
-                    dish_image TEXT
-                )
-            """)
-            
-            cur.execute(f"""
-                CREATE TABLE IF NOT EXISTS {orders_table_name} (
-                    item TEXT NOT NULL,
-                    price INTEGER,
-                    qty TEXT,
-                    total INTEGER,
-                    place TEXT,
-                    rest TEXT,
-                    dish_image TEXT,
-                    date TEXT
-                )
-            """)
-            
-            # Commit changes
-            conn.commit()
-            
-        except psycopg2.Error as e:
-            # Print or log error
-            print(f"An error occurred: {e}")
-            if conn:
-                conn.rollback()
-        
-        finally:
-            if conn:
-                conn.close()
-        
-        return redirect(url_for('homepage_customer'))
-    
-    return "Invalid request method.", 405
+	session['username']=request.form['username']             #session is a dictionery with username its key.. value is nm variable
+	password=request.form['password']
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	
+	cur.execute("INSERT INTO customers(username,password) VALUES (?,?)",(session['username'],password))
+	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT)".format("_"+session['username']))
+	temp="_"+session['username']+'_orders'
+	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT);".format(temp))
+	conn.commit()
+	return redirect(url_for('homepage_customer'))
 
 
-
- # Replace with your actual secret key
-
-def get_db():
-    return psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-
+#when customer wants to logout
 @app.route('/customer_logout')
 def customer_logout():
-    session.pop('username', None)
-    return redirect(url_for('homepage_customer'))
+	session.pop('username', None)					#used to logout of current session
+	return redirect(url_for('homepage'))
 
+
+
+
+#homepage of customer where restaurants are needed to be selected
 @app.route('/homepage_customer')
 def homepage_customer():
-    conn = get_db()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT * FROM response WHERE username=%s", (session.get('username', None),))
-        response = cur.fetchall()
-        
-        cur.execute("SELECT * FROM most_ordered ORDER BY orders DESC LIMIT 4")
-        most_ordered = cur.fetchall()
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return render_template('homepage_customer.html', response=response, most_ordered=most_ordered)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM response WHERE username=?",(session['username'],))
+	response=cur.fetchall()
+	cur.execute("SELECT * FROM most_ordered ORDER BY orders DESC limit 4")
+	most_ordered=cur.fetchall()
+	conn.close()
+	return render_template('homepage_customer.html',response=response,most_ordered=most_ordered)
 
-@app.route('/remove_response')
+
+
+
+
+
+
+#when customer wants to remove responses
+@app.route('/remove_response')	
 def remove_response():
-    conn = get_db()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("DELETE FROM response WHERE username=%s", (session.get('username', None),))
-        conn.commit()
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return redirect(url_for('homepage_customer'))
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM response WHERE username=?",(session['username'],))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('homepage_customer'))
 
-@app.route('/search', methods=['GET', 'POST'])
+
+
+#search option
+@app.route('/search',methods=['GET','POST'])
 def search():
-    data = request.form.get('data', '')
-    conn = get_db()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("DELETE FROM search")
-        
-        for place in ['Accra', 'Kumasi', 'Takoradi']:
-            cur.execute("SELECT username FROM managers WHERE place=%s", (place,))
-            usernames = cur.fetchall()
-            
-            for username in usernames:
-                query = sql.SQL("SELECT * FROM {} WHERE item ILIKE %s").format(
-                    sql.Identifier(username[0])
-                )
-                cur.execute(query, ('%' + data + '%',))
-                results = cur.fetchall()
-                
-                for result in results:
-                    cur.execute("""
-                        INSERT INTO search (item, def, price, category, place, rest, dish_image, company)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-                    """, (result[0], result[1], result[2], result[3], place, username[0], result[4], result[6]))
-        
-        conn.commit()
-    
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        conn.rollback()
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return redirect(url_for('search_result', data=data))
+	data=request.form['data']
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM search")
+	cur.execute("SELECT username FROM managers WHERE place='Accra'")
+	var_username_Accra=cur.fetchall()
+	cur.execute("SELECT username FROM managers WHERE place='Kumasi'")
+	var_username_Kumasi=cur.fetchall()
+	cur.execute("SELECT username FROM managers WHERE place='Takoradi'")
+	var_username_Takoradi=cur.fetchall()
+	conn.commit()
+	conn.close()
 
-@app.route('/search_report', methods=['GET', 'POST'])
+	conn=sqlite3.connect('Accra.db')
+	cur=conn.cursor()
+	for x in var_username_Accra:
+		cur.execute("SELECT * FROM {} WHERE item LIKE ?".format(x[0]),('%'+data+'%',))
+		var=cur.fetchall()
+		if var:
+			for y in var:
+				conn_temp=sqlite3.connect('members.db')
+				cur_temp=conn_temp.cursor()
+				cur_temp.execute("INSERT INTO search(item,def,price,category,place,rest,dish_image,company) VALUES(?,?,?,?,?,?,?,?); ",(y[0],y[1],y[2],y[3],'Accra',x[0],y[4],y[6]))
+				conn_temp.commit()
+				conn_temp.close()	
+	conn.close()
+
+	conn=sqlite3.connect('Kumasi.db')
+	cur=conn.cursor()
+	for x in var_username_Kumasi:
+		cur.execute("SELECT * FROM {} WHERE item LIKE ?".format(x[0]),('%'+data+'%',))
+		var=cur.fetchall()
+		if var:
+			for y in var:
+				conn_temp=sqlite3.connect('members.db')
+				cur_temp=conn_temp.cursor()
+				cur_temp.execute("INSERT INTO search(item,def,price,category,place,rest,dish_image,company) VALUES(?,?,?,?,?,?,?,?); ",(y[0],y[1],y[2],y[3],'Kumasi',x[0],y[4],y[6]))
+				conn_temp.commit()
+				conn_temp.close()	
+	conn.close()
+
+	conn=sqlite3.connect('Takoradi.db')
+	cur=conn.cursor()
+	for x in var_username_Takoradi:
+		cur.execute("SELECT * FROM {} WHERE item LIKE ?".format(x[0]),('%'+data+'%',))
+		var=cur.fetchall()
+		if var:
+			for y in var:
+				conn_temp=sqlite3.connect('members.db')
+				cur_temp=conn_temp.cursor()
+				cur_temp.execute("INSERT INTO search(item,def,price,category,place,rest,dish_image,company) VALUES(?,?,?,?,?,?,?,?); ",(y[0],y[1],y[2],y[3],'Takoradi',x[0],y[4],y[6]))
+				conn_temp.commit()
+				conn_temp.close()	
+	conn.close()
+
+	return redirect(url_for('search_result',data=data))
+
+
+
+@app.route("/search_report", methods=["GET", "POST"])
 def search_report():
+    # Check if user is logged in
     if 'username' not in session:
         return "Unauthorized access"
-    
+
+    # Get username from session
     username = session['username']
+    
+    # Initialize new_orders variable
     new_orders = 0
     
-    if request.method == 'POST':
-        date = request.form.get('date', '')
-        conn = get_db()
-        cur = conn.cursor()
-        
+    if request.method == "POST":
+        # Handle POST request
         try:
-            cur.execute("SELECT count(*) FROM orders WHERE status=%s AND rest=%s", ('new', username))
-            new_orders = cur.fetchone()[0]
-            
-            cur.execute("SELECT * FROM orders WHERE rest LIKE %s AND date LIKE %s AND approve='Approved'", (f'%{username}%', date))
-            rows = cur.fetchall()
-            
-            totalAmount = sum(row[3] for row in rows)
+            # Establish database connection
+            with sqlite3.connect('members.db') as conn:
+                cur = conn.cursor()
+                
+                # Count new orders for the logged-in user
+                status = 'new'  # Adjust status as per your database schema
+                cur.execute("SELECT count(*) FROM orders WHERE status=? AND rest=?", (status, username))
+                new_orders = cur.fetchone()[0]
+                
+                # Retrieve orders for the logged-in user and specified date
+                date = request.form["date"]
+                cur.execute("SELECT * FROM orders WHERE rest LIKE ? AND date LIKE ? AND approve='Approved'", (f'%{username}%', date))
+                rows = cur.fetchall()
+                
+                # Calculate total amount of orders
+                totalAmount = sum(row[3] for row in rows)  # Assuming 'total' is the 4th column (index 3)
         
-        except psycopg2.Error as e:
-            print(f"PostgreSQL error: {e}")
+        except sqlite3.Error as e:
+            print(f"SQLite error: {e}")
             return "Database error occurred"
         
-        finally:
-            cur.close()
-            conn.close()
-        
+        # Render sales report template with data
         return render_template("sales_report.html", var=rows, totalAmount=totalAmount, date=date, new_orders=new_orders)
     
+    # Handle GET request (initial page load)
     return render_template("noreport.html", new_orders=new_orders)
 
+
+
+#to access after search is completed
 @app.route('/search_result/<data>')
 def search_result(data):
-    conn = get_db()
-    cur = conn.cursor()
-    dict = {}
-    
-    try:
-        cur.execute("SELECT * FROM search")
-        var = cur.fetchall()
-        
-        cur.execute("SELECT * FROM managers WHERE username ILIKE %s", (f'%{data}%',))
-        var_rest = cur.fetchall()
-        
-        for rest in var_rest:
-            cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            count = cur.fetchone()[0]
-            
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            total_stars = cur.fetchall()
-            
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
-            
-            dict[(rest[0], rest[3])] = average_stars
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return render_template('search_result.html', var=var, var_rest=var_rest, data=data, dict=dict)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	dict={}
+	cur.execute("SELECT * FROM search")
+	var=cur.fetchall()
+	cur.execute("SELECT * FROM managers WHERE username LIKE ?",('%'+data+'%',))
+	var_rest=cur.fetchall()	
+	for rest in var_rest:
+		cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+		count=cur.fetchone()
+		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+		total_stars=cur.fetchall()
+		sum=0
+		for x in total_stars:
+			sum=sum+x[0]
+		if(count[0]==0):
+			sum=0
+		else:		
+			sum=sum/count[0]			
+		dict[rest[0],rest[3]]=sum
+	conn.close()
 
+	return render_template('search_result.html',var=var,var_rest=var_rest,data=data,dict=dict)
+
+
+#to access after search is completed
+# @app.route('/search_result/<data>')
+# def search_result(data):
+# 	conn=sqlite3.connect('members.db')
+# 	cur=conn.cursor()
+# 	dict={}
+# 	cur.execute("SELECT * FROM SEARCH")
+# 	var=cur.fetchall()
+# 	cur.execute("SELECT * FROM managers WHERE username LIKE ?",('%'+data+'%',))
+# 	var_rest=cur.fetchall()	
+# 	for rest in var_rest:
+# 		cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+# 		count=cur.fetchone()
+# 		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+# 		total_stars=cur.fetchall()
+# 		sum=0
+# 		for x in total_stars:
+# 			sum=sum+x[0]
+# 		if(count[0]==0):
+# 			sum=0
+# 		else:		
+# 			sum=sum/count[0]			
+# 		dict[rest[0],rest[3]]=sum
+# 	conn.close()
+
+# 	return render_template('search_result.html',var=var,var_rest=var_rest,data=data,dict=dict)
+
+#to access after search sort for dishes is selected
 @app.route('/search_result_sort/<sort>/<data>')
-def search_result_sort(sort, data):
-    conn = get_db()
-    cur = conn.cursor()
-    dict = {}
-    
-    try:
-        order_by = {
-            'desc': 'price DESC',
-            'asc': 'price',
-            'AtoZ': 'item',
-            'ZtoA': 'item DESC'
-        }.get(sort, 'item')
-        
-        cur.execute(f"SELECT * FROM search ORDER BY {order_by}")
-        var = cur.fetchall()
-        
-        cur.execute("SELECT * FROM managers WHERE username ILIKE %s", (f'%{data}%',))
-        var_rest = cur.fetchall()
-        
-        for rest in var_rest:
-            cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            count = cur.fetchone()[0]
-            
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            total_stars = cur.fetchall()
-            
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
-            
-            dict[(rest[0], rest[3])] = average_stars
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return render_template('search_result.html', var=var, var_rest=var_rest, data=data, dict=dict)
+def search_result_sort(sort,data):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	dict={}
+	if(sort=="desc"):
+		cur.execute("SELECT * FROM SEARCH ORDER BY price DESC")
+		var=cur.fetchall()
+	if(sort=="asc"):
+		cur.execute("SELECT * FROM SEARCH ORDER BY price ")
+		var=cur.fetchall()	
+	if(sort=="AtoZ"):
+		cur.execute("SELECT * FROM SEARCH ORDER BY item")
+		var=cur.fetchall()
+	if(sort=="ZtoA"):
+		cur.execute("SELECT * FROM SEARCH ORDER BY item DESC")
+		var=cur.fetchall()	
+	cur.execute("SELECT * FROM managers WHERE username LIKE ?",('%'+data+'%',))
+	var_rest=cur.fetchall()	
+	for rest in var_rest:
+		cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+		count=cur.fetchone()
+		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+		total_stars=cur.fetchall()
+		sum=0
+		for x in total_stars:
+			sum=sum+x[0]
+		if(count[0]==0):
+			sum=0
+		else:		
+			sum=sum/count[0]			
+		dict[rest[0],rest[3]]=sum
+	conn.close()
 
+	return render_template('search_result.html',var=var,var_rest=var_rest,data=data,dict=dict)
+
+
+
+#to access when search sort for restaurants is selected
 @app.route('/search_result_sort_rest/<sort>/<data>')
-def search_result_sort_rest(sort, data):
-    conn = get_db()
-    cur = conn.cursor()
-    dict = {}
-    
-    try:
-        if sort == 'asc':
-            cur.execute("SELECT * FROM managers WHERE username ILIKE %s ORDER BY username", (f'%{data}%',))
-        elif sort == 'desc':
-            cur.execute("SELECT * FROM managers WHERE username ILIKE %s ORDER BY username DESC", (f'%{data}%',))
-        elif sort == 'rating':
-            cur.execute("SELECT * FROM managers WHERE username ILIKE %s", (f'%{data}%',))
-            var_rest = cur.fetchall()
-            for rest in var_rest:
-                cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-                count = cur.fetchone()[0]
-                
-                cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-                total_stars = cur.fetchall()
-                
-                sum_stars = sum(star[0] for star in total_stars)
-                average_stars = sum_stars / count if count > 0 else 0
-                
-                dict[rest[0]] = average_stars
-            
-            ord_dict = collections.OrderedDict(sorted(dict.items(), key=lambda x: x[1], reverse=True))
-            return render_template('search_result_rating.html', var_rest=var_rest, data=data, ord_dict=ord_dict)
-        
-        else:
-            cur.execute("SELECT * FROM managers WHERE username ILIKE %s", (f'%{data}%',))
-        
-        var_rest = cur.fetchall()
-        for rest in var_rest:
-            cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            count = cur.fetchone()[0]
-            
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (rest[3], rest[0]))
-            total_stars = cur.fetchall()
-            
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
-            
-            dict[rest[0]] = average_stars
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return render_template('search_result.html', var_rest=var_rest, data=data, dict=dict)
+def search_result_sort_rest(sort,data):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	dict={}
+	cur.execute("SELECT * FROM SEARCH")
+	var=cur.fetchall()
+	if(sort=="asc"):
+			cur.execute("SELECT * FROM managers WHERE username LIKE ? ORDER BY username",('%'+data+'%',))
+			var_rest=cur.fetchall()
+			for rest in var_rest:
+				cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+				count=cur.fetchone()
+				cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+				total_stars=cur.fetchall()
+				sum=0
+				for x in total_stars:
+					sum=sum+x[0]
+				if(count[0]==0):
+					sum=0
+				else:		
+					sum=sum/count[0]			
+				dict[rest[0],rest[3]]=sum
+	elif(sort=="desc"):
+		cur.execute("SELECT * FROM managers WHERE username LIKE ? ORDER BY username DESC",('%'+data+'%',))
+		var_rest=cur.fetchall()
+		for rest in var_rest:
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]			
+			dict[rest[0],rest[3]]=sum
+	elif(sort=="rating"):	
+		cur.execute("SELECT * FROM managers WHERE username LIKE ?",('%'+data+'%',))
+		var_rest=cur.fetchall()
+		for rest in var_rest:
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(rest[3],rest[0],))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]			
+			dict[rest[0],rest[3]]=sum
+		#to arrange dictionery in reverse order	
+		conn.close()
+		ord_dict = collections.OrderedDict(sorted(dict.items(), key=lambda x: x[1], reverse=True))
+		return render_template('search_result_rating.html',var=var,var_rest=var_rest,data=data,ord_dict=ord_dict)
 
-@app.route('/<place>')
+	conn.close()	
+	return render_template('search_result.html',var=var,var_rest=var_rest,data=data,dict=dict)
+
+
+
+
+#to access when location is selected from homepage_customer
+@app.route('/<place>')			
 def location(place):
-    conn = get_db()
-    cur = conn.cursor()
-    dict = {}
-    
-    try:
-        cur.execute("SELECT username FROM managers WHERE place=%s", (place,))
-        managers = cur.fetchall()
-        
-        for manager in managers:
-            cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (place, manager[0]))
-            count = cur.fetchone()[0]
-            
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (place, manager[0]))
-            total_stars = cur.fetchall()
-            
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
-            
-            dict[manager[0]] = average_stars
-    
-    finally:
-        cur.close()
-        conn.close()
-    
-    return render_template('restaurants.html', location=place, dict=dict)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	dict={}
+	#shows all tables
+	cur.execute("SELECT COUNT(*) FROM managers WHERE place=?",(place,))
+	var=cur.fetchone()
+	#if database in nonempty
+	if(var[0]>0):   #since no row_factory=Row , coloumn number is used
+		cur.execute("SELECT * FROM managers WHERE place=?",(place,))
+		var=cur.fetchall()
+
+		for rest in var:
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]	
+			#single key dictionery is used because no 2 restaurants will have same name			
+			dict[rest[0]]=sum
+
+		conn.close()
+		return render_template('restaurants.html',var=var,place=place,dict=dict)		
+		#from restaurants.html , goes to /menu/<var>
+	else:
+		return render_template('norestaurants.html')
+
+
+#to access when location sort is selected 
+@app.route('/sort/<place>/<sort>')			
+def sort_location(place,sort):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	dict={}
+	#shows all tables
+	cur.execute("SELECT COUNT(*) FROM managers WHERE place=?",(place,))
+	var=cur.fetchone()
+	#if database in nonempty
+	if(var[0]>0):   #since no row_factory=Row , coloumn number is used
+		if(sort=="asc"):
+			cur.execute("SELECT * FROM managers WHERE place=? ORDER BY username",(place,))
+			var=cur.fetchall()
+			for rest in var:
+				cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				count=cur.fetchone()
+				cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				total_stars=cur.fetchall()
+				sum=0
+				for x in total_stars:
+					sum=sum+x[0]
+				if(count[0]==0):
+					sum=0
+				else:		
+					sum=sum/count[0]			
+				dict[rest[0]]=sum
+		elif(sort=="desc"):
+			cur.execute("SELECT * FROM managers WHERE place=? ORDER BY username DESC",(place,))
+			var=cur.fetchall()
+			for rest in var:
+				cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				count=cur.fetchone()
+				cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				total_stars=cur.fetchall()
+				sum=0
+				for x in total_stars:
+					sum=sum+x[0]
+				if(count[0]==0):
+					sum=0
+				else:		
+					sum=sum/count[0]			
+				dict[rest[0]]=sum
+		elif(sort=="rating"):	
+			cur.execute("SELECT * FROM managers WHERE place=? ORDER BY username DESC",(place,))
+			var=cur.fetchall()
+			for rest in var:
+				cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				count=cur.fetchone()
+				cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest[0],))
+				total_stars=cur.fetchall()
+				sum=0
+				for x in total_stars:
+					sum=sum+x[0]
+				if(count[0]==0):
+					sum=0
+				else:		
+					sum=sum/count[0]			
+				dict[rest[0]]=sum	
+			#to arrange dictionery in reverse order	
+			conn.close()
+			ord_dict = collections.OrderedDict(sorted(dict.items(), key=lambda x: x[1], reverse=True))
+			return render_template('restaurants_sort_rating.html',var=var,place=place,ord_dict=ord_dict)
+
+		conn.close()
+		return render_template('restaurants.html',var=var,place=place,dict=dict)		
+		#from restaurants.html , goes to /menu/<var>
+	else:
+		return render_template('norestaurants.html')
 
 
 #to access different menus of restaurants
-
-def get_db_connection(place=None):
-    """Establish and return a database connection based on the place."""
-    if place in ['Accra', 'Kumasi']:
-        conn = sqlite3.connect(f'{place}.db')
-        conn.row_factory = sqlite3.Row
-    else:
-        conn = psycopg2.connect(
-            dbname='tastyh',
-            user='tastyh_user',
-            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-            port='5432'
-        )
-    return conn
-
 @app.route('/<place>/menu/<rest>')
-def menu(place, rest):
-    conn = get_db_connection(place)
-    cur = conn.cursor()
-    
-    try:
-        cur.execute(f"SELECT COUNT(*) FROM {rest}")
-        if cur.fetchone()[0] > 0:
-            categories = ['veg', 'non-veg', 'others']
-            menu_items = {}
-            
-            for category in categories:
-                cur.execute(f"SELECT * FROM {rest} WHERE category=%s", (category,))
-                menu_items[category] = cur.fetchall()
-            
-            if conn.dsn:
-                conn.close()  # Close SQLite connection if used
+def menu(place,rest):
+	#checks which place is selected ie which database 
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')
+	conn.row_factory = sqlite3.Row
+	cur=conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM {}".format(rest))
+	var=cur.fetchone()
+	if(var['count(*)']>0):	#since row_factory=Row,col name is used
+		cur.execute("SELECT * FROM {} WHERE category='veg'".format(rest)) 
+		var_veg=cur.fetchall()
+		cur.execute("SELECT * FROM {} WHERE category='non-veg'".format(rest)) 
+		var_non_veg=cur.fetchall()
+		cur.execute("SELECT * FROM {} WHERE category='others'".format(rest)) 
+		var_others=cur.fetchall()
+		conn.close()
 
-            conn = get_db_connection()
-            cur = conn.cursor()
+		conn=sqlite3.connect('members.db')
+		cur=conn.cursor()
+		cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+		temp=cur.fetchone()
+		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+		var_stars=cur.fetchone()
+		cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest,))
+		count=cur.fetchone()
+		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest,))
+		total_stars=cur.fetchall()
+		sum=0
+		for x in total_stars:
+			sum=sum+x[0]
+		if(count[0]==0):
+			sum=0
+		else:		
+			sum=sum/count[0]
+		conn.close()
+		#<var> variables contains all items in table, each row is accessed and displayed by colname
+		return render_template('menu.html',var_veg=var_veg,var_non_veg=var_non_veg,var_others=var_others,place=place,rest=rest,temp=temp,var_stars=var_stars,sum=sum)
+		#from menu.html , goes to /quantity/<item>/<price>
+	else:
+		return render_template('nomenu.html',place=place)
 
-            cur.execute("SELECT * FROM managers WHERE place=%s AND username=%s", (place, rest))
-            temp = cur.fetchone()
 
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s AND username=%s", (place, rest, session.get('username')))
-            var_stars = cur.fetchone()
+#rating..
+@app.route('/<place>/<rest>/rating/<stars>')		
+def rating(place,rest,stars):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("INSERT INTO rating(place,rest,username,stars) VALUES(?,?,?,?) ",(place,rest,session['username'],stars,))
+	cur.execute("UPDATE reviews SET rating=? WHERE place=? AND rest=? AND username=?",(stars,place,rest,session['username'],))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('menu',place=place,rest=rest))
 
-            cur.execute("SELECT COUNT(*) FROM rating WHERE place=%s AND rest=%s", (place, rest))
-            count = cur.fetchone()[0]
 
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (place, rest))
-            total_stars = cur.fetchall()
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
 
-            return render_template('menu.html', **menu_items, place=place, rest=rest, temp=temp, var_stars=var_stars, sum=average_stars)
-
-        return render_template('nomenu.html', place=place)
-    
-    finally:
-        cur.close()
-        conn.close()
-
-@app.route('/<place>/<rest>/rating/<stars>')
-def rating(place, rest, stars):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            INSERT INTO rating (place, rest, username, stars)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (place, rest, username) DO UPDATE
-            SET stars = EXCLUDED.stars
-        """, (place, rest, session['username'], stars))
-        
-        cur.execute("""
-            INSERT INTO reviews (place, rest, username, rating)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (place, rest, username) DO UPDATE
-            SET rating = EXCLUDED.rating
-        """, (place, rest, session['username'], stars))
-
-        conn.commit()
-        return redirect(url_for('menu', place=place, rest=rest))
-    
-    finally:
-        cur.close()
-        conn.close()
-
+#rating..when user wants to change rating
 @app.route('/<place>/<rest>/rating_change/<stars>')
-def rating_change(place, rest, stars):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            UPDATE rating SET stars = %s
-            WHERE place = %s AND rest = %s AND username = %s
-        """, (stars, place, rest, session['username']))
+def rating_change(place,rest,stars):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("UPDATE rating SET stars=? WHERE place=? AND rest=? AND username=?",(stars,place,rest,session['username'],))
+	cur.execute("UPDATE reviews SET rating=? WHERE place=? AND rest=? AND username=?",(stars,place,rest,session['username'],))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('menu',place=place,rest=rest))
 
-        cur.execute("""
-            UPDATE reviews SET rating = %s
-            WHERE place = %s AND rest = %s AND username = %s
-        """, (stars, place, rest, session['username']))
 
-        conn.commit()
-        return redirect(url_for('menu', place=place, rest=rest))
-    
-    finally:
-        cur.close()
-        conn.close()
 
+
+#when sorting is selected from menu
 @app.route('/<place>/menu/<rest>/<sort>')
-def menu_sort(place, rest, sort):
-    conn = get_db_connection(place)
-    cur = conn.cursor()
-    
-    try:
-        order_by = {
-            "nameasc": "item ASC",
-            "namedes": "item DESC",
-            "pricelh": "price ASC",
-            "pricehl": "price DESC"
-        }.get(sort, "item ASC")
-        
-        cur.execute(f"SELECT COUNT(*) FROM {rest}")
-        if cur.fetchone()[0] > 0:
-            categories = ['veg', 'non-veg', 'others']
-            menu_items = {}
-            
-            for category in categories:
-                cur.execute(f"SELECT * FROM {rest} WHERE category=%s ORDER BY {order_by}", (category,))
-                menu_items[category] = cur.fetchall()
-            
-            if conn.dsn:
-                conn.close()  # Close SQLite connection if used
+def menu_sort(place,rest,sort):
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')
+	conn.row_factory = sqlite3.Row
+	cur=conn.cursor()
+	if(sort=="nameasc"):
+		cur.execute("SELECT COUNT(*) FROM {}".format(rest))
+		var=cur.fetchone()
 
-            conn = get_db_connection()
-            cur = conn.cursor()
+		if(var['count(*)']>0):	#since row_factory=Row,col name is used
+			cur.execute("SELECT * FROM {} WHERE category='veg' ORDER BY item ASC".format(rest)) 
+			var_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='non-veg' ORDER BY item ASC".format(rest)) 
+			var_non_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='others' ORDER BY item ASC".format(rest)) 
+			var_others=cur.fetchall()
+			conn.close()
 
-            cur.execute("SELECT * FROM managers WHERE place=%s AND username=%s", (place, rest))
-            temp = cur.fetchone()
+			conn=sqlite3.connect('members.db')
+			cur=conn.cursor()
+			cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+			temp=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+			var_stars=cur.fetchone()
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest,))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest,))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]
+			conn.close()
+			#<var> variables contains all items in table, each row is accessed and displayed by colname
+			return render_template('menu.html',var_veg=var_veg,var_non_veg=var_non_veg,var_others=var_others,place=place,rest=rest,temp=temp,var_stars=var_stars,sum=sum)
+			#from menu.html , goes to /quantity/<item>/<price>
+		else:
+			return render_template('nomenu.html',place=place)	
 
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s AND username=%s", (place, rest, session.get('username')))
-            var_stars = cur.fetchone()
+	elif(sort=="namedes"):
+		cur.execute("SELECT COUNT(*) FROM {}".format(rest))
+		var=cur.fetchone()
+		if(var['count(*)']>0):	#since row_factory=Row,col name is used
+			cur.execute("SELECT * FROM {} WHERE category='veg' ORDER BY item DESC".format(rest)) 
+			var_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='non-veg' ORDER BY item DESC".format(rest)) 
+			var_non_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='others' ORDER BY item DESC".format(rest)) 
+			var_others=cur.fetchall()
+			conn.close()
 
-            cur.execute("SELECT COUNT(*) FROM rating WHERE place=%s AND rest=%s", (place, rest))
-            count = cur.fetchone()[0]
+			conn=sqlite3.connect('members.db')
+			cur=conn.cursor()
+			cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+			temp=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+			var_stars=cur.fetchone()
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest,))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest,))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]
+			conn.close()
+			#<var> variables contains all items in table, each row is accessed and displayed by colname
+			return render_template('menu.html',var_veg=var_veg,var_non_veg=var_non_veg,var_others=var_others,place=place,rest=rest,temp=temp,var_stars=var_stars,sum=sum)
+			#from menu.html , goes to /quantity/<item>/<price>
+		else:
+			return render_template('nomenu.html',place=place)	
 
-            cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (place, rest))
-            total_stars = cur.fetchall()
-            sum_stars = sum(star[0] for star in total_stars)
-            average_stars = sum_stars / count if count > 0 else 0
+	elif(sort=="pricelh"):
+		cur.execute("SELECT COUNT(*) FROM {}".format(rest))
+		var=cur.fetchone()
+		if(var['count(*)']>0):	#since row_factory=Row,col name is used
+			cur.execute("SELECT * FROM {} WHERE category='veg' ORDER BY price".format(rest)) 
+			var_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='non-veg' ORDER BY price".format(rest)) 
+			var_non_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='others' ORDER BY price".format(rest)) 
+			var_others=cur.fetchall()
+			conn.close()
 
-            return render_template('menu.html', **menu_items, place=place, rest=rest, temp=temp, var_stars=var_stars, sum=average_stars)
-        
-        return render_template('nomenu.html', place=place)
-    
-    finally:
-        cur.close()
-        conn.close()
+			conn=sqlite3.connect('members.db')
+			cur=conn.cursor()
+			cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+			temp=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+			var_stars=cur.fetchone()
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest,))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest,))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]
+			conn.close()
+			#<var> variables contains all items in table, each row is accessed and displayed by colname
+			return render_template('menu.html',var_veg=var_veg,var_non_veg=var_non_veg,var_others=var_others,place=place,rest=rest,temp=temp,var_stars=var_stars,sum=sum)
+			#from menu.html , goes to /quantity/<item>/<price>
+		else:
+			return render_template('nomenu.html',place=place)	
 
-@app.route('/quantity/<place>/<rest>/<item>/<price>/<dish_image>', methods=['GET', 'POST'])
-def quantity(place, rest, item, price, dish_image):
-    return render_template('quantity.html', item=item, price=price, place=place, rest=rest, dish_image=dish_image)
+	elif(sort=="pricehl"):
+		cur.execute("SELECT COUNT(*) FROM {}".format(rest))
+		var=cur.fetchone()
+		if(var['count(*)']>0):	#since row_factory=Row,col name is used
+			cur.execute("SELECT * FROM {} WHERE category='veg' ORDER BY price DESC".format(rest)) 
+			var_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='non-veg' ORDER BY price DESC".format(rest)) 
+			var_non_veg=cur.fetchall()
+			cur.execute("SELECT * FROM {} WHERE category='others' ORDER BY price DESC".format(rest)) 
+			var_others=cur.fetchall()
+			conn.close()
 
-@app.route('/postquantity/<place>/<rest>/<item>/<price>/<dish_image>', methods=['POST'])
-def postquantity(place, rest, item, price, dish_image):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        qty = request.form['qty']
-        total = int(price) * int(qty)
-        table_name = f"_{session['username']}"
+			conn=sqlite3.connect('members.db')
+			cur=conn.cursor()
+			cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+			temp=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+			var_stars=cur.fetchone()
+			cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,rest,))
+			count=cur.fetchone()
+			cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,rest,))
+			total_stars=cur.fetchall()
+			sum=0
+			for x in total_stars:
+				sum=sum+x[0]
+			if(count[0]==0):
+				sum=0
+			else:		
+				sum=sum/count[0]
+			conn.close()
+			#<var> variables contains all items in table, each row is accessed and displayed by colname
+			return render_template('menu.html',var_veg=var_veg,var_non_veg=var_non_veg,var_others=var_others,place=place,rest=rest,temp=temp,var_stars=var_stars,sum=sum)
+			#from menu.html , goes to /quantity/<item>/<price>
+		else:
+			return render_template('nomenu.html',place=place)	
 
-        cur.execute(f"""
-            INSERT INTO {table_name} (item, price, qty, total, place, rest, dish_image)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (item, place, rest) DO UPDATE
-            SET qty = qty + EXCLUDED.qty, total = qty * price
-        """, (item, price, qty, total, place, rest, dish_image))
-        
-        conn.commit()
-        return redirect(url_for('homepage_customer'))
-    
-    finally:
-        cur.close()
-        conn.close()
+
+
+
+
+
+
+#to submit quantity of item selected	
+@app.route('/quantity/<place>/<rest>/<item>/<price>/<dish_image>',methods=['GET','POST'])
+def quantity(place,rest,item,price,dish_image):
+	return render_template('quantity.html',item=item,price=price,place=place,rest=rest,dish_image=dish_image)
+	#from quantity.html , goes to /postquantity/<item>/<price>
+
+
+
+#to insert quantity in CART table
+@app.route('/postquantity/<place>/<rest>/<item>/<price>/<dish_image>',methods=['GET','POST'])
+def postquantity(place,rest,item,price,dish_image):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	qty=request.form['qty']
+	var=int(price)*int(qty)
+	cur.execute("INSERT INTO {}(item,price,qty,total,place,rest,dish_image) VALUES(?,?,?,?,?,?,?); ".format("_"+session['username']) ,(item,price,qty,var,place,rest,dish_image,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('homepage_customer'))
 
 @app.route("/add_quantity/<id>")
 def add_quantity(id):
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
     
-    table_name = f"_{session['username']}"
+    find_table = "_" + session["username"]
     
-    try:
-        cur.execute(f"SELECT * FROM {table_name} WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute(f"""
-                UPDATE {table_name} SET qty = qty + 1, total = qty * price
-                WHERE id = ?
-            """, (id,))
-            conn.commit()
-        return redirect(url_for('cartshow'))
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM {} WHERE id=?".format(find_table), (id,))
+    check = cur.fetchone()
     
-    finally:
-        cur.close()
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE {} SET qty = qty + 1 WHERE id = ?".format(find_table), (id,))
+        
+        # Update total price for the item based on the updated quantity
+        cur.execute("UPDATE {} SET total = qty * price WHERE id = ?".format(find_table), (id,))
+        
+        conn.commit()
         conn.close()
+
+    return redirect(url_for('cartshow'))
+
+
 
 @app.route("/approve_order/<id>")
 def approve_order(id):
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
     
-    try:
-        cur.execute("SELECT * FROM orders WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute("UPDATE orders SET approve = 'Approved' WHERE id = ?", (id,))
-            conn.commit()
-        return redirect(url_for('m_orders'))
+    # find_table = "_" + session["username"]
     
-    finally:
-        cur.close()
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM orders  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE orders SET approve = 'Approved' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
         conn.close()
+
+    return redirect(url_for('m_orders'))
 
 @app.route("/cancel_order/<id>")
 def cancel_order(id):
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
     
-    try:
-        cur.execute("SELECT * FROM orders WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = ?", (id,))
-            conn.commit()
-        return redirect(url_for('m_orders'))
+    # find_table = "_" + session["username"]
     
-    finally:
-        cur.close()
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM orders  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
         conn.close()
 
+    return redirect(url_for('m_orders'))
+
+
+
+
+
+def connect_db():
+    """Establish and return a connection to the SQLite database."""
+    return sqlite3.connect('members.db')
 @app.route("/reset_password", methods=["POST"])
 def reset_password():
-    """Reset the password for a user."""
-    username = request.form.get("username")
-    new_password = request.form.get("new_password")
+    """Reset the password for a user based on their username."""
+    
+    # Clear the session username
+    session.pop("username", None)
+    
+    # Retrieve form data
+    username = request.form.get('username')
+    new_password = request.form.get('password')  # Assuming you get the new password from the form
 
+    # Validate input
     if not username or not new_password:
-        flash("Username and new password are required!", "error")
-        return redirect(url_for('homepage_customer'))
+        flash("Username and new password are required.")
+        return redirect(url_for('homepage'))
 
-    conn = get_db_connection()
+    # Connect to the database
+    conn = connect_db()
     cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            UPDATE users SET password = %s
-            WHERE username = %s
-        """, (new_password, username))
-        conn.commit()
-        flash("Password reset successful!", "success")
-        return redirect(url_for('homepage_customer'))
-    
-    finally:
-        cur.close()
-        conn.close()
 
+    # Update password in the managers table
+    cur.execute("SELECT * FROM managers WHERE username=?", (username,))
+    if cur.fetchone():
+        cur.execute("UPDATE managers SET password=? WHERE username=?", (new_password, username))
+        conn.commit()
+        conn.close()
+        flash("Password reset successfully.")
+        return redirect(url_for('homepage'))
+
+    # Update password in the customers table
+    cur.execute("SELECT * FROM customers WHERE username=?", (username,))
+    if cur.fetchone():
+        cur.execute("UPDATE customers SET password=? WHERE username=?", (new_password, username))
+        conn.commit()
+        conn.close()
+        flash("Password reset successfully.")
+        return redirect(url_for('homepage'))
+
+    # If username is not found in either table
+    conn.close()
+    flash("Username not found in the database.")
+    return redirect(url_for('homepage'))
 
 
 # Handle cases where the request method is not POST
@@ -1074,883 +1245,1055 @@ def connect_db():
     # Adjust the database path as needed
     return sqlite3.connect('members.db')
 
- # Set your secret key for session management
-
-def get_db_connection():
-    """Establish and return a database connection."""
-    if 'username' in session:
-        # Assuming different databases for different scenarios
-        if session['username'] == 'admin11':
-            return psycopg2.connect(
-                dbname='tastyh',
-                user='tastyh_user',
-                password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-                host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-                port='5432'
-            )
-        else:
-            return sqlite3.connect('members.db')
-    return None
-
 @app.route("/manager_logged_in", methods=['POST'])
 def manager_logged_in():
-    username = request.form.get('username')
+    if request.method == 'POST':
+        username = request.form.get('username')
 
-    if username == "admin11":
-        return redirect(url_for('admin'))
+        if  username=="admin11":
+            # flash("Username is required")
+            return redirect(url_for('admin'))
+		
+        # Connect to the database
+        conn = connect_db()
+        cur = conn.cursor()
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    try:
-        # Check for active promotions
+        # Check for active promotions (if needed, you can use this later)
         cur.execute("SELECT * FROM promotion WHERE status='1'")
         promotions = cur.fetchall()
 
         # Check if the username exists in the managers table and get the place
         cur.execute("SELECT place FROM managers WHERE username=?", (username,))
         place = cur.fetchone()
-
+        
         if place:
-            session['username'] = username
-            return redirect(url_for('manager_homepage', place=place[0]))
-
+            place = place[0]  # Extract the place from the tuple
+            session['username'] = username  # Store username in session
+            conn.close()
+            return redirect(url_for('manager_homepage', place=place))
+        
         # If username is not found in managers table, check the customers table
         cur.execute("SELECT * FROM customers WHERE username=?", (username,))
         customer = cur.fetchone()
 
         if customer:
-            session['username'] = username
-            return render_template('homepage_customer.html', promotions=promotions)
-
+            session['username'] = username  # Store username in session
+            conn.close()
+            return render_template('homepage_customer.html',promotions=promotions)
+        
+        conn.close()
         flash("Username not found in the database")
         return redirect(url_for('homepage'))
+		
 
-    finally:
-        cur.close()
-        conn.close()
+    # Handle cases where the request method is not POST
+    flash("Method not allowed")
+    return redirect(url_for('homepage'))
+
+#to check for table in place
+
 
 @app.route("/approve_advert/<id>")
 def approve_advert(id):
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
-
-    try:
-        cur.execute("SELECT * FROM promotion WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute("UPDATE promotion SET status = '1' WHERE id = ?", (id,))
-            conn.commit()
-        return redirect(url_for('advert'))
-
-    finally:
-        cur.close()
+    
+    # find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM promotion  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE promotion SET status = '1' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
         conn.close()
+
+    return redirect(url_for('advert'))
 
 @app.route("/cancel_advert/<id>")
 def cancel_advert(id):
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
-
-    try:
-        cur.execute("SELECT * FROM promotion WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute("UPDATE promotion SET status = '0' WHERE id = ?", (id,))
-            conn.commit()
-        return redirect(url_for('advert'))
-
-    finally:
-        cur.close()
+    
+    # find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM promotion  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE promotion SET status = '0' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
         conn.close()
 
+    return redirect(url_for('advert'))
 
-def get_db():
-    """Return a database connection."""
-    return psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
 
-def safe_table_name(name):
-    """Sanitize the table name to ensure it follows PostgreSQL naming rules."""
-    sanitized_name = re.sub(r'\W|^(?=\d)', '_', name)
-    if sanitized_name[0].isdigit():
-        sanitized_name = '_' + sanitized_name
-    return sanitized_name
 
-@app.route("/cancel_order_customer/<int:id>")
+
+
+@app.route("/cancel_order_customer/<id>")
 def cancel_order_customer(id):
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        
-        cur.execute("SELECT * FROM orders WHERE id=%s", (id,))
-        if cur.fetchone():
-            cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = %s", (id,))
-            conn.commit()
-        
-        return redirect(url_for('cartshow'))
-
-    except psycopg2.Error as e:
-        print(f"An error occurred: {e}")
-        if conn:
-            conn.rollback()
-        
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
-@app.route("/remove_quantity/<int:id>")
-def remove_quantity(id):
-    user_table = safe_table_name(session.get("username", ""))  # Safeguard against missing username
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        
-        cur.execute(f"SELECT * FROM {user_table} WHERE id=%s", (id,))
-        if cur.fetchone():
-            cur.execute(f"UPDATE {user_table} SET qty = qty - 1 WHERE id = %s", (id,))
-            cur.execute(f"UPDATE {user_table} SET total = qty * price WHERE id = %s", (id,))
-            conn.commit()
-        
-        return redirect(url_for('cartshow'))
-
-    except psycopg2.Error as e:
-        print(f"An error occurred: {e}")
-        if conn:
-            conn.rollback()
-        
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
-@app.route('/cartshow')
-def cartshow():
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-
-        cur.execute("SELECT * FROM managers")
-        managers = cur.fetchall()
-
-        user_table = safe_table_name(session.get('username', ''))
-        cur.execute(f"SELECT COUNT(*) FROM {user_table}")
-        item_count = cur.fetchone()[0]
-
-        if item_count > 0:
-            cur.execute(f"SELECT * FROM {user_table}")
-            cart_items = cur.fetchall()
-            return render_template('cartshow.html', var=cart_items, var2=managers)
-        else:
-            return render_template("nocart.html")
-
-    except psycopg2.Error as e:
-        print(f"Error in cartshow: {e}")
-        return f"Error in cartshow: {e}"
-    
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
-@app.route('/cartremove/<item>/<place>/<rest>/<int:qty>')
-def cartremove(item, place, rest, qty):
-    user_table = safe_table_name(session.get('username', ''))
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        
-        cur.execute(f"SELECT COUNT(*) FROM {user_table}")
-        item_count = cur.fetchone()[0]
-
-        if item_count > 0:
-            cur.execute(f"DELETE FROM {user_table} WHERE item=%s AND place=%s AND qty=%s", (item, place, qty))
-            conn.commit()
-        
-        return redirect(url_for('cartshow'))
-
-    except psycopg2.Error as e:
-        print(f"An error occurred: {e}")
-        if conn:
-            conn.rollback()
-        
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
-
-@app.route('/cartpay')
-def cartpay():
-    return render_template('cartpay.html')
-
-@app.route('/paycard')
-def paycard():
-    return render_template('paycard.html')
-
-@app.route('/cartclear')
-def cartclear():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    username = session['username']
-    orders_table = f"_{username}_orders"
-    current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
-
-    try:
-        cur.execute(f"SELECT * FROM _{username}")
-        cart_items = cur.fetchall()
-
-        for item in cart_items:
-            cur.execute(f"INSERT INTO {orders_table} VALUES(?,?,?,?,?,?,?,?)",
-                        (item[0], item[1], item[2], item[3], item[4], item[5], item[6], current_date))
-            cur.execute("INSERT INTO orders(item, price, qty, total, place, rest, dish_image, phone, date, status, approve) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                        (item[0], item[1], item[2], item[3], item[4], item[5], item[6], username, current_date, "new", "Pending"))
-            
-            cur.execute("SELECT * FROM managers WHERE username=?", (item[5],))
-            manager = cur.fetchone()
-            if manager and len(manager) > 8:
-                manager_email = manager[8]
-                # send_email(manager_email, "New Order Notification")
-                
-            cur.execute("SELECT * FROM most_ordered WHERE place=? AND rest=? AND item=?", (item[4], item[5], item[0]))
-            most_ordered = cur.fetchone()
-            if most_ordered:
-                cur.execute("UPDATE most_ordered SET orders=orders+? WHERE place=? AND rest=? AND item=?", (item[2], item[4], item[5], item[0]))
-            else:
-                cur.execute("INSERT INTO most_ordered VALUES(?,?,?,?,?,?)", (item[4], item[5], item[0], item[2], item[6], item[1]))
-
-        cur.execute("INSERT INTO response VALUES(?,?,?,?)", (username, 'confirmation', 'order confirmed', 'admin'))
-        cur.execute(f"DELETE FROM _{username}")
-
+    
+    # find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM orders  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
         conn.commit()
-
-    except sqlite3.Error as e:
-        print(f"SQLite error in cartclear: {e}")
-
-    finally:
-        cur.close()
         conn.close()
 
     return redirect(url_for('orders'))
 
+@app.route("/remove_quantity/<id>")
+def remove_quantity(id):
+    conn = sqlite3.connect('members.db')
+    cur = conn.cursor()
+    
+    find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM {} WHERE id=?".format(find_table), (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the item
+        cur.execute("UPDATE {} SET qty = qty - 1 WHERE id = ?".format(find_table), (id,))
+        
+        # Update total price for the item based on the updated quantity
+        cur.execute("UPDATE {} SET total = qty * price WHERE id = ?".format(find_table), (id,))
+        
+        conn.commit()
+        conn.close()
+
+    return redirect(url_for('cartshow'))
+
+
+@app.route('/cartshow')
+def cartshow():
+    conn = sqlite3.connect('members.db')
+    cur = conn.cursor()
+    
+    try:
+        # Fetch managers (assuming it's necessary for context)
+        cur.execute("SELECT * FROM managers")
+        var2 = cur.fetchall()
+
+        # Check if there are items in the cart
+        cur.execute("SELECT COUNT(*) FROM {}".format("_"+session['username']))
+        var1 = cur.fetchone()
+        
+        if var1[0] > 0:
+            # Fetch all items in the cart
+            cur.execute("SELECT * FROM {}".format("_"+session['username']))
+            var = cur.fetchall()
+            
+            conn.commit()
+            
+            # Render cart if there are items, otherwise render nocart.html
+            if var:
+                return render_template('cartshow.html', var=var, var2=var2)
+            else:
+                return render_template("nocart.html")
+        
+        else:
+            return render_template("nocart.html")
+    
+    except Exception as e:
+        print(f"Error in cartshow: {str(e)}")
+        conn.rollback()
+        return f"Error in cartshow: {str(e)}" # Render your custom error page or handle error accordingly
+    
+    finally:
+        conn.close()
+
+@app.route('/cartremove/<item>/<place>/<rest>/<qty>')
+def cartremove(item,place,rest,qty):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM {}".format("_"+session['username']))
+	var1=cur.fetchone()
+	if(var1[0]>0):
+		cur.execute("DELETE FROM {} WHERE item=? AND place=? AND qty=?".format("_"+session['username']),(item,place,qty,))
+		conn.commit()
+		conn.close()
+		return redirect(url_for('cartshow'))
+	else:
+		return render_template("nocart.html")
+
+#to display total and proceed to pay
+@app.route('/cartpay')
+def cartpay():
+	return render_template('cartpay.html')
+	#two options in cartpay, card and COD
+
+#to access if card is selected as mode of payment
+@app.route('/paycard')
+def paycard():
+	return render_template('paycard.html')
+	#from paycard.html , goes to /cartclear
+
+
+
+#clear items in cart
+
+@app.route('/cartclear')
+def cartclear():
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Redirect to login if user not logged in
+    
+    username = session['username']
+    orders_table = f"_{username}_orders"
+    current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+    
+    try:
+        with sqlite3.connect('members.db') as conn:
+            cur = conn.cursor()
+            
+            # Backup cart items to user's orders history
+            cur.execute(f"SELECT * FROM _{username}")
+            cart_items = cur.fetchall()
+            
+            for item in cart_items:
+                # Move items to orders history
+                cur.execute(f"INSERT INTO {orders_table} VALUES(?,?,?,?,?,?,?,?)",
+                            (item[0], item[1], item[2], item[3], item[4], item[5], item[6], current_date))
+                
+                # Record the order in a global orders table
+                cur.execute("INSERT INTO orders(item, price, qty, total, place, rest, dish_image, phone, date, status, approve) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                            (item[0], item[1], item[2], item[3], item[4], item[5], item[6], username, current_date, "new", "Pending"))
+                
+                # Notify managers of the restaurant
+                cur.execute("SELECT * FROM managers WHERE username=?", (item[5],))
+                manager = cur.fetchone()
+                # if manager:
+                #     if len(manager) > 8:
+                #         manager_email = manager[8]
+                #         msg = Message('New Order Notification', recipients=[manager_email])
+                #         msg.html = """
+                #             <html>
+                #             <body>
+                #             <h3>TastyHub</h3>
+                #             <p>You have a new order. <a href='http://localhost:5000/m_orders>'<button> View Order(s)</button></a></p>
+                #             </body>
+                #             </html>
+                #         """
+                #         mail.send(msg)
+                #     else:
+                #         print(f"Error: Manager record for {item[5]} is incomplete.")
+                # else:
+                #     print(f"No manager found for username {item[5]}.")
+                
+                # Update most ordered table
+                cur.execute("SELECT * FROM most_ordered WHERE place=? AND rest=? AND item=?",(item[4], item[5], item[0],))
+                check = cur.fetchone()
+                if check:
+                    cur.execute("UPDATE most_ordered SET orders=orders+? WHERE place=? AND rest=? AND item=?",
+                                (item[2], item[4], item[5], item[0],))
+                else:
+                    cur.execute("INSERT INTO most_ordered VALUES(?,?,?,?,?,?)",
+                                (item[4], item[5], item[0], item[2], item[6], item[1],))
+            
+            # Record confirmation response
+            cur.execute("INSERT INTO response VALUES(?,?,?,?)", (username, 'confirmation', 'order confirmed', 'admin',))
+            
+            # Clear the user's cart
+            cur.execute(f"DELETE FROM _{username}")
+        
+    except sqlite3.Error as e:
+        print(f"SQLite error in cartclear: {e}")
+    
+    return redirect(url_for('orders'))
+
+
+
+#when user wants to see past orders
 @app.route('/orders')
 def orders():
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
+    temp = "_" + session['username'] + '_orders'
+    cur.execute("SELECT * FROM orders WHERE	phone=? ORDER BY date DESC", (session['username'],))
+    var = cur.fetchall()
+    conn.close()
+    
+    if var:
+        return render_template('orders.html', var=var)
+    else:
+        return render_template('no_orders.html')
 
-    try:
-        cur.execute("SELECT * FROM orders WHERE phone=? ORDER BY date DESC", (session['username'],))
-        orders = cur.fetchall()
-        return render_template('orders.html', var=orders) if orders else render_template('no_orders.html')
-
-    finally:
-        cur.close()
-        conn.close()
 
 @app.route('/m_orders')
 def m_orders():
+    status = 'new'
     conn = sqlite3.connect('members.db')
     cur = conn.cursor()
+    cur.execute("UPDATE orders SET status = 'old' WHERE rest = ?", (session['username'],))
+    conn.commit()
+    # Retrieve orders for the current restaurant manager (assuming session['username'] is set)
+    cur.execute("SELECT * FROM orders WHERE rest = ? ORDER BY date DESC", (session['username'],))
+    var = cur.fetchall()
+    
+    # Count new orders for the current restaurant manager
+    cur.execute("SELECT count(*) FROM orders WHERE status=? AND rest=?", (status, session['username']))
+    new_orders = cur.fetchone()[0]
+    
+    conn.close()
+    
+    if var:
+        return render_template('manager_order.html', var=var, new_orders=new_orders)
+    else:
+        return render_template('no_orders.html')
 
-    try:
-        cur.execute("UPDATE orders SET status = 'old' WHERE rest = ?", (session['username'],))
-        conn.commit()
-        cur.execute("SELECT * FROM orders WHERE rest = ? ORDER BY date DESC", (session['username'],))
-        orders = cur.fetchall()
 
-        cur.execute("SELECT count(*) FROM orders WHERE status='new' AND rest=?", (session['username'],))
-        new_orders_count = cur.fetchone()[0]
 
-        return render_template('manager_order.html', var=orders, new_orders=new_orders_count) if orders else render_template('no_orders.html')
 
-    finally:
-        cur.close()
-        conn.close()
+#for submitting feedback to manager from customer
+@app.route('/feedback/<place>/<rest>',methods=['GET','POST'])
+def feedback(place,rest):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	message=request.form['message']
+	cur.execute("INSERT INTO feedback VALUES(?,?,?,?)",(place,rest,session['username'],message,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('menu',place=place,rest=rest))
 
-@app.route('/feedback/<place>/<rest>', methods=['POST'])
-def feedback(place, rest):
-    conn = psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
 
-    try:
-        message = request.form['message']
-        cur.execute("INSERT INTO feedback (place, rest, username, message) VALUES (%s, %s, %s, %s)",
-                    (place, rest, session['username'], message))
-        conn.commit()
-        return redirect(url_for('menu', place=place, rest=rest))
 
-    finally:
-        cur.close()
-        conn.close()
-
+#to show reviews of restaurants
 @app.route('/reviews/<place>/<rest>')
-def reviews(place, rest):
-    conn = psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-
-    try:
-        cur.execute("SELECT * FROM reviews WHERE place=%s AND rest=%s", (place, rest))
-        reviews_list = cur.fetchall()
-        return render_template('reviews.html', place=place, rest=rest, reviews=reviews_list)
-
-    finally:
-        cur.close()
-        conn.close()
-
+def reviews(place,rest):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM reviews WHERE place=? AND rest=?",(place,rest,))
+	reviews=cur.fetchall()
+	return render_template('reviews.html',place=place,rest=rest,reviews=reviews)
 
 
 #to insert review in reviews table
+@app.route('/review_post/<place>/<rest>',methods=['GET','POST'])
+def review_post(place,rest):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	review=request.form['review']
+	date=time.strftime("%x")
+	cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
+	stars=cur.fetchone()
+	#if user has not rated the restaurant
+	if not stars:
+		cur.execute("INSERT INTO reviews(username,rest,place,date,rating,review) VALUES(?,?,?,?,?,?)",(session['username'],rest,place,date,0,review,))
+	else:		
+		cur.execute("INSERT INTO reviews(username,rest,place,date,rating,review) VALUES(?,?,?,?,?,?)",(session['username'],rest,place,date,stars[0],review,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('reviews',place=place,rest=rest))
 
 
-# Database configuration
-DATABASE_CONFIG = {
-    'dbname': 'tastyh',
-    'user': 'tastyh_user',
-    'password': '8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-    'host': 'dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-    'port': '5432'
-}
 
-# Folder configuration
 
-def get_db_connection():
-    return psycopg2.connect(**DATABASE_CONFIG)
 
-@app.route('/review_post/<place>/<rest>', methods=['GET', 'POST'])
-def review_post(place, rest):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    review = request.form['review']
-    date = time.strftime("%x")
-    username = session.get('username')
-    
-    cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s AND username=%s", (place, rest, username))
-    stars = cur.fetchone()
-    
-    if stars is None:
-        cur.execute("INSERT INTO reviews (username, rest, place, date, rating, review) VALUES (%s, %s, %s, %s, %s, %s)", 
-                    (username, rest, place, date, 0, review))
-    else:
-        cur.execute("INSERT INTO reviews (username, rest, place, date, rating, review) VALUES (%s, %s, %s, %s, %s, %s)", 
-                    (username, rest, place, date, stars[0], review))
-    
-    conn.commit()
-    conn.close()
-    return redirect(url_for('reviews', place=place, rest=rest))
 
-@app.route('/manager_login', methods=['GET', 'POST'])
+
+
+
+
+
+
+
+
+
+
+
+#to access when manager_login is selected from homepage
+@app.route('/manager_login',methods=['GET','POST'])
 def manager_login():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM managers")
-    managers = cur.fetchall()
-    conn.close()
-    return render_template('manager_login.html', var=managers)
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM managers")
+	var=cur.fetchall()
+	conn.close()
+	return render_template('manager_login.html',var=var)
+	#from manager_login.html , if valid username , goes to /manager_logged_in	
 
+#to access for new manager 
 @app.route('/manager_signup')
 def manager_signup():
-   
-    
-    return render_template('manager_signup.html')
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT username,place FROM managers")
+	var=cur.fetchall()
+	cur.execute("SELECT username,place FROM approval")
+	approval=cur.fetchall()
+	conn.close()
+	return render_template('manager_signup.html',var=var,approval=approval)
 
-@app.route('/manager_signed_up', methods=['GET', 'POST'])
+
+app.config['UPLOAD_FOLDER_REST']='static/restaurants/'
+#when manager submites sign up form
+@app.route('/manager_signed_up',methods=['GET','POST'])
 def manager_signed_up():
-    place = request.form['place']
-    username = request.form['username']
-    password = request.form['password']
-    location = request.form['location']
-    phone = request.form['phone']
-    start_time = request.form['start_time']
-    close_time = request.form['close_time']
-    email = request.form["email"]
-    name = request.form["restaurant_name"]
-    roles = "manager"
-    
-    file = request.files['filename']
-    filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config['UPLOAD_FOLDER_REST'], filename))
-    
-    source = os.path.join(app.config['UPLOAD_FOLDER_REST'], filename)
-    destination = os.path.join(app.config['UPLOAD_FOLDER_REST'], f"{place}_{username}.jpg")
-    os.rename(source, destination)
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("INSERT INTO approval (username, password, filename, place, location, phone, start, stop, email, role, name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (username, password, f"{place}_{username}.jpg", place, location, phone, start_time, close_time, email, roles, name))
-    
-    conn.commit()
-    conn.close()
-    return render_template('manager_processing.html')
+	upload='static/restaurants/'
+	place=request.form['place']
+	username=request.form['username']
+	password=request.form['password']
+	location=request.form['location']
+	phone=request.form['phone']
+	start_time=request.form['start_time']
+	close_time=request.form['close_time']
+	email = request.form["email"]
+	name = request.form["restaurant_name"]
+	roles="manager"
 
+	#The image file of restarant is received here
+	file = request.files['filename']
+	filename = secure_filename(file.filename)
+	#The image is stored in static folder
+	file.save(os.path.join(app.config['UPLOAD_FOLDER_REST'],filename))
+	#renaming image file
+	source=upload+filename
+	destination=upload+place+'_'+username+'.jpg'
+	os.rename(source,destination)
+
+
+	#to create entry in approval table 
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("INSERT INTO approval(username,password,filename,place,location,phone,start,stop,email,role,name) values(?,?,?,?,?,?,?,?,?,?,?)",(username,password,place+'_'+username+'.jpg',place,location,phone,start_time,close_time,email,roles,name))
+	conn.commit()
+	conn.close()
+	return render_template('manager_processing.html')
+
+
+#when manager wants to logout
 @app.route('/manager_logout')
 def manager_logout():
+    """Log out the manager by clearing the session and redirect to the homepage."""
+    
+    # Remove 'username' from the session to log out
     session.pop('username', None)
+    
+    # Redirect to the homepage
     return redirect(url_for('homepage'))
+
+
 
 @app.route("/forget_password")
 def forget_password():
-    session.pop("username", None)
-    return render_template("forget.html")
+	session.pop("username", None)
+	return render_template("forget.html")
 
 
-def get_db_connection():
-    """Return a PostgreSQL database connection."""
-    return psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
 
-@app.route('/manager_homepage/<place>', methods=['GET', 'POST'])
+#manager session created after manager login
+ # Make sure to set a secret key for session management
+
+
+#to check for table in place
+@app.route('/manager_homepage/<place>',methods=['GET','POST'])
 def manager_homepage(place):
-    # Here, PostgreSQL is used for database access
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    username = session.get('username')
-    
-    # Fetch tables for the given place
-    cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
-    tables = cur.fetchall()
-    
-    conn.close()
-    return redirect(url_for('manager_menu', place=place, username=username))
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	username=session['username']
+	#to select all table names in database
+	cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+	var=cur.fetchall()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))
+	
 
 @app.route('/go_manager')
 def go_manager():
     username = session.get("username")
     if username is None:
-        return redirect(url_for('login'))
+        # Handle the case where the username is not in the session
+        return redirect(url_for('login'))  # Assuming you have a login route
 
-    conn = get_db_connection()
+    conn = sqlite3.connect('members.db')
     cur = conn.cursor()
-    cur.execute("SELECT place FROM managers WHERE username=%s", (username,))
+    cur.execute("SELECT place FROM managers WHERE username=?", (username,))
     place_row = cur.fetchone()
     conn.close()
-
+    
     if place_row is None:
-        return redirect(url_for('error_page'))
+        # Handle the case where no place is found for the username
+        return redirect(url_for('error_page'))  # Assuming you have an error page route
 
     place = place_row[0]
+    
     return redirect(url_for('manager_homepage', place=place))
 
-@app.route('/manager_menu/<place>/<username>')
-def manager_menu(place, username):
-    conn = psycopg2.connect(
-        dbname=f"{place}",
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-    
-    cur.execute(f"SELECT * FROM {username}")
-    menu_items = cur.fetchall()
-    conn.close()
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("SELECT * FROM notification WHERE place=%s AND rest=%s", (place, username))
-    notifications = cur.fetchall()
-    
-    cur.execute("SELECT * FROM feedback WHERE place=%s AND rest=%s", (place, username))
-    feedbacks = cur.fetchall()
-    
-    cur.execute("SELECT * FROM managers WHERE username=%s AND place=%s", (username, place))
-    manager_info = cur.fetchone()
-    
-    cur.execute("SELECT stars FROM rating WHERE place=%s AND rest=%s", (place, username))
-    total_stars = cur.fetchall()
-    
-    cur.execute("SELECT count(*) FROM rating WHERE place=%s AND rest=%s", (place, username))
-    count = cur.fetchone()
-    
-    cur.execute("SELECT count(*) FROM orders WHERE status=%s AND rest=%s", ('new', username))
-    new_orders = cur.fetchone()[0]
-    
-    conn.close()
-    
-    average_stars = sum(x[0] for x in total_stars) / count[0] if count[0] != 0 else 0
-    return render_template('manager_menu.html', new_orders=new_orders, var=menu_items, var1=manager_info, place=place, username=username, sum=average_stars, feedbacks=feedbacks, notification=notifications)
-
-@app.route('/manager_edit_restaurant_form/<place>/<username>/<loc>/<ph>/<st>/<ct>/<di>')
-def manager_edit_restaurant_form(place, username, loc, ph, st, ct, di):
-    return render_template('manager_edit_restaurant_form.html', place=place, username=username, loc=loc, ph=ph, st=st, ct=ct, di=di)
-
-@app.route('/manager_edit_restaurant/<place>/<username>', methods=['GET', 'POST'])
-def manager_edit_restaurant(place, username):
-    location = request.form['location']
-    phone = request.form['phone']
-    start_time = request.form['start_time']
-    close_time = request.form['close_time']
-    
-    file = request.files['filename']
-    if file:
-        filename = secure_filename(file.filename)
-        old_image = os.path.join(app.config['UPLOAD_FOLDER_REST'], f"{place}_{username}.jpg")
-        if os.path.exists(old_image):
-            os.remove(old_image)
         
-        file.save(os.path.join(app.config['UPLOAD_FOLDER_REST'], filename))
-        source = os.path.join(app.config['UPLOAD_FOLDER_REST'], filename)
-        destination = os.path.join(app.config['UPLOAD_FOLDER_REST'], f"{place}_{username}.jpg")
-        os.rename(source, destination)
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("UPDATE managers SET location=%s, phone=%s, start=%s, stop=%s, filename=%s WHERE place=%s AND username=%s",
-                (location, phone, start_time, close_time, f"{place}_{username}.jpg", place, username))
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('manager_homepage', place=place))
 
-@app.route('/manager_edit/<place>/<username>/<action>', methods=['GET', 'POST'])
-def manager_edit(place, username, action):
-    if action == "add":
-        conn = psycopg2.connect(
-            dbname=f"{place}",
-            user='tastyh_user',
-            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-            port='5432'
-        )
-        cur = conn.cursor()
-        cur.execute(f"SELECT item FROM {username}")
-        items = cur.fetchall()
-        conn.close()
-        return render_template('manager_add.html', var=items, place=place, username=username)
-    elif action == "update":
-        conn = psycopg2.connect(
-            dbname=f"{place}",
-            user='tastyh_user',
-            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-            port='5432'
-        )
-        cur = conn.cursor()
-        cur.execute(f"SELECT item FROM {username}")
-        items = cur.fetchall()
-        conn.close()
-        return render_template('manager_update.html', var=items, place=place, username=username)
-    elif action == "delete":
-        conn = psycopg2.connect(
-            dbname=f"{place}",
-            user='tastyh_user',
-            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-            port='5432'
-        )
-        cur = conn.cursor()
-        cur.execute(f"SELECT item FROM {username}")
-        items = cur.fetchall()
-        conn.close()
-        return render_template('manager_delete.html', var=items, place=place, username=username)
+        
+	
+#shows manager's menu
+@app.route('/manager_menu/<place>/<username>')
+def manager_menu(place,username):
+	status ="new"
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM {}".format(username))	#username is table name
+	var=cur.fetchall()
+	conn.close()
+  
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM notification WHERE place=? AND rest=?",(place,username,))
+	notification=cur.fetchall()
+	cur.execute("SELECT * FROM feedback WHERE place=? AND rest=?",(place,username,))
+	feedbacks=cur.fetchall()
+	cur.execute("SELECT * FROM managers WHERE username=? AND place=?",(username,place,))	
+	var1=cur.fetchone()
+	cur.execute("SELECT stars FROM rating WHERE place=? AND rest=?",(place,username,))
+	total_stars=cur.fetchall()
+	cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,username,))
+	count=cur.fetchone()
+	cur.execute("SELECT count(*) FROM orders WHERE status=? AND rest=?",(status,username,))
+	new_orders =cur.fetchone()[0]
+	conn.close()
+	sum=0
+	for x in total_stars:
+		sum=sum+x[0]
+	if(count[0]==0):
+		sum=0
+	else:		
+		sum=sum/count[0]
+	return render_template('manager_menu.html',new_orders=new_orders,var=var,var1=var1,place=place,username=username,sum=sum,feedbacks=feedbacks,notification=notification)
+	#from manager_menu.html , goes to manager_edit based on action choice
 
-@app.route('/manager_add/<place>/<username>', methods=['POST'])
-def manager_add(place, username):
-    item = request.form['item']
-    price = request.form['price']
-    conn = psycopg2.connect(
-        dbname=f"{place}",
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-    cur.execute(f"INSERT INTO {username} (item, price) VALUES (%s, %s)", (item, price))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('manager_menu', place=place, username=username))
 
-@app.route('/manager_update/<place>/<username>', methods=['POST'])
-def manager_update(place, username):
-    item = request.form['item']
-    new_price = request.form['new_price']
-    conn = psycopg2.connect(
-        dbname=f"{place}",
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-    cur.execute(f"UPDATE {username} SET price=%s WHERE item=%s", (new_price, item))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('manager_menu', place=place, username=username))
 
-@app.route('/manager_delete/<place>/<username>', methods=['POST'])
-def manager_delete(place, username):
-    item = request.form['item']
-    conn = psycopg2.connect(
-        dbname=f"{place}",
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-    cur.execute(f"DELETE FROM {username} WHERE item=%s", (item,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('manager_menu', place=place, username=username))
+
+
+#when manager wants to edit restaurant details
+@app.route('/manager_edit_restaurant_form/<place>/<username>/<loc>/<ph>/<st>/<ct>/<di>')
+def manager_edit_restarant_form(place,username,loc,ph,st,ct,di):
+	return render_template('manager_edit_restaurant_form.html',place=place,username=username,loc=loc,ph=ph,st=st,ct=ct,di=di)
+
+
+app.config['UPLOAD_FOLDER_REST1']='static/restaurants/'
+#when manager wants to edit restaurant details
+@app.route('/manager_edit_restaurant/<place>/<username>',methods=['GET','POST'])
+def manager_edit_restarant(place,username):
+	location=request.form['location']
+	phone=request.form['phone']
+	start_time=request.form['start_time']
+	close_time=request.form['close_time']
+	upload='static/restaurants/'
+
+	#The image file of restarant is received here
+	file = request.files['filename']
+	if file:
+		filename = secure_filename(file.filename)
+		#to remove existing image
+		source=upload+place+'_'+username+'.jpg'
+		os.remove(source)
+
+		#The image is stored in static folder
+		file.save(os.path.join(app.config['UPLOAD_FOLDER_REST1'],filename))
+		#renaming image file
+		source=upload+filename
+		destination=upload+place+'_'+username+'.jpg'
+		os.rename(source,destination)
+
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("UPDATE managers SET location=?,phone=?,start=?,stop=?,filename=? WHERE place=? AND username=?".format(username),(location,phone,start_time,close_time,place+'_'+username+'.jpg',place,username,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_homepage',place=place))
+
+
+
+
+
+#to access when manager wants to edit items for manager_menu display
+@app.route('/manager_edit/<place>/<username>/<action>',methods=['GET','POST'])
+def manager_edit(place,username,action):
+	if(action=="add"):
+		if(place=='Accra'):
+			conn=sqlite3.connect('Accra.db')
+		elif(place=='Kumasi'):
+			conn=sqlite3.connect('Kumasi.db')
+		else:
+			conn=sqlite3.connect('location.db')	
+		cur=conn.cursor()
+		cur.execute("SELECT item FROM {}".format(username))	
+		var=cur.fetchall()
+		conn.close()
+		return render_template('manager_add.html',var=var,place=place,username=username)
+	elif(action=="delete"):
+		return redirect(url_for('manager_delete',place=place,username=username))
+	elif(action=="editprice"):
+		return redirect(url_for('manager_editprice',place=place,username=username))
+	
+
+
+
+
+
+
+app.config['UPLOAD_FOLDER_DISH'] = 'static/dish/'
+
+#to access when manager wants to add items 
+@app.route('/manager_add/<place>/<username>',methods=['GET','POST'])
+def manager_add(place,username):
+	conn =  sqlite3.connect('members.db')
+	cur = conn.cursor()
+	cur.execute("SELECT * FROM managers WHERE username=?", (username,))
+
+	var=cur.fetchone()
+	upload='static/dish/'
+	item=request.form['item']
+	def1=request.form['def'] 
+	price=request.form['price']
+	category=request.form['category']
+	#The image file of dish is received here
+	file = request.files['filename']
+	filename = secure_filename(file.filename)
+	#The image is stored in static folder
+	file.save(os.path.join(app.config['UPLOAD_FOLDER_DISH'],filename))
+	#renaming image file
+	source=upload+filename
+	destination=upload+place+'_'+username+'_'+item+'.jpg'
+	os.rename(source,destination)
+
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("INSERT INTO {}(item,def,price,category,dish_image,company) VALUES(?,?,?,?,?,?); ".format(username) ,(item,def1,price,category,place+'_'+username+'_'+item+'.jpg',var[10]))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))
+
+
+
+
+#to access when manager wants to delete items 
+@app.route('/manager_delete/<place>/<username>')
+def manager_delete(place,username):
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM {}".format(username))
+	var1=cur.fetchone()
+	#if table in nonempty
+	if(var1[0]>0):
+		cur.execute("SELECT * FROM {}".format(username))
+		var=cur.fetchall()
+		conn.close()
+		return render_template('manager_delete.html',place=place,username=username,var=var)
+	else:
+		return render_template("no_managermenu.html",place=place,username=username)
+
+
+#to delete items from database after manager selects delete items
+@app.route('/manager_delete_database/<place>/<username>/<item>/<defen>')
+def manager_delete_database(place,username,item,defen):
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	upload='static/dish/'
+	cur.execute("SELECT dish_image FROM {} WHERE item=? and def=?".format(username),(item,defen,))
+	var=cur.fetchone()
+	os.remove(upload+var[0])
+	cur.execute("DELETE FROM {} WHERE item=? and def=?".format(username),(item,defen,))
+	conn.commit()
+	conn.close()
+
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM most_ordered WHERE place=? AND rest=? AND item=?",(place,session['username'],item,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))
+
+
+
+#to access when manager wants to edit price of items 
+@app.route('/manager_editprice/<place>/<username>')
+def manager_editprice(place,username):
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM {}".format(username))
+	var1=cur.fetchone()
+	#if table is nonempty
+	if(var1[0]>0):
+		cur.execute("SELECT * FROM {}".format(username))
+		var=cur.fetchall()
+		conn.close()
+		return render_template('manager_editprice.html',place=place,username=username,var=var)
+	else:
+		return render_template("no_managermenu.html",place=place,username=username)
+
+
+
+#to edit price of item from database after manager selects edit price
+@app.route('/manager_editprice_newprice/<place>/<username>/<item>',methods=['GET','POST'])
+def manager_editprice_newprice(place,username,item):
+	return render_template('manager_editprice_newprice.html',place=place,username=username,item=item)
+
+
+
+#to enter new price in manager_editprice_database
+@app.route('/manager_editprice_database/<place>/<username>/<item>',methods=['GET','POST'])
+def manager_editprice_database(place,username,item):
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	price=request.form['price']
+	cur.execute("UPDATE {} SET price=? WHERE item=?".format(username),(price,item,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))
+
+
+
+@app.route('/promote_shop',methods=['GET','POST'])
+def promote_shop():
+	username = session["username"]
+	status="0"
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	fname=request.form['fname']
+	lname = request.form["lname"]
+	method = request.form["method"]
+	amount=  request.form["amount"]
+	company = request.form["company"]
+	cur.execute("SELECT * FROM managers WHERE username=?", (username,))
+
+	var=cur.fetchone()
+	cur.execute("INSERT INTO promotion(fname,lastname,amount,method,username,status,filename,location,company) VALUES(?,?,?,?,?,?,?,?,?)",(fname,lname,amount,method,username,status,var[2],var[3],company,))
+	conn.commit()
+	conn.close()
+	flash("Successful")
+	return redirect(url_for('manager_menu',place=var[3],username=var[0]))	
+
+
+
+
+#when manager wants to send response to customers
+@app.route('/response_form_manager/<username>/<place>/<message>')
+def response_form_manager(username,place,message):
+	return render_template('response_form_manager.html',username=username,place=place,message=message)
+
+
+#insert querys to response table
+@app.route('/response_manager/<username>/<place>/<message>',methods=['GET','POST'])
+def response_manager(username,place,message):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	response=request.form['message']
+	cur.execute("DELETE FROM feedback WHERE username=? AND place=? AND rest=? AND message=?",(username,place,session['username'],message,))
+	cur.execute("INSERT INTO response(username,message,sender) VALUES(?,?,?)",(username,response,session['username'],))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_homepage',place=place))	
+
+
+#when manager wants to remove feedbacks
+@app.route('/remove_feedbacks/<place>/<username>')	
+def remove_feedbacks(place,username):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM feedback WHERE place=? AND rest=?",(place,username,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))
+
+
+#when manager wants to remove notifications
+@app.route('/remove_notifications/<place>/<username>')	
+def remove_notifications(place,username):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM notification WHERE place=? AND rest=?",(place,username,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('manager_menu',place=place,username=username))	
+
+	
+
+#to show reviews of restaurant
+@app.route('/reviews_manager/<place>')
+def reviews_manager(place):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM reviews WHERE place=? AND rest=?",(place,session['username'],))
+	reviews=cur.fetchall()
+	return render_template('reviews_manager.html',place=place,reviews=reviews)
+
+
+
+
+
+
+
+
+
+
+@app.route("/advert")
+def advert():
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute('SELECT * FROM promotion')
+	var=cur.fetchall()
+	return render_template("advert.html",rows=var)
 
 
 
 
 @app.route('/admin_access')
 def admin_access():
-    return render_template('admin_access.html')
+	return render_template('admin_access.html')
 
 
-def get_db():
-    """Return a PostgreSQL database connection."""
-    return psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
+
+
 @app.route('/admin')
 def admin():
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute('SELECT * FROM approval')
+	var=cur.fetchall()
+	cur.execute("SELECT username FROM customers")
+	customers=cur.fetchall()
+	cur.execute('SELECT * FROM managers WHERE place=?',('Accra',))
+	var_Accra=cur.fetchall()
+	cur.execute('SELECT * FROM managers WHERE place=?',('Kumasi',))
+	var_Kumasi=cur.fetchall()
+	cur.execute('SELECT * FROM managers WHERE place=?',('location',))
+	var_location=cur.fetchall()
+	cur.execute("SELECT * FROM messages")
+	var_message=cur.fetchall()
+	conn.close()
+	return render_template('admin.html',var=var,var_Accra=var_Accra,var_Kumasi=var_Kumasi,var_location=var_location,var_message=var_message,customers=customers,)
 
-        cur.execute('SELECT * FROM approval')
-        approvals = cur.fetchall()
 
-        cur.execute("SELECT username FROM customers")
-        customers = cur.fetchall()
 
-        cur.execute('SELECT * FROM managers WHERE place=%s', ('Accra',))
-        managers_Accra = cur.fetchall()
-
-        cur.execute('SELECT * FROM managers WHERE place=%s', ('Kumasi',))
-        managers_Kumasi = cur.fetchall()
-
-        cur.execute('SELECT * FROM managers WHERE place=%s', ('location',))
-        managers_location = cur.fetchall()
-
-        cur.execute("SELECT * FROM messages")
-        messages = cur.fetchall()
-
-        return render_template(
-            'admin.html',
-            approvals=approvals,
-            managers_Accra=managers_Accra,
-            managers_Kumasi=managers_Kumasi,
-            managers_location=managers_location,
-            messages=messages,
-            customers=customers
-        )
-
-    except psycopg2.Error as e:
-        print(f"Database error: {e}")
-        return "An error occurred while fetching data."
-    
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
+#when admin wants to remove the request of new restaurant
 @app.route('/admin_remove/<username>/<place>')
-def admin_remove(username, place):
-    upload = 'static/restaurants/'
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
+def admin_remove(username,place):
+	upload='static/restaurants/'
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT filename FROM approval WHERE username=? AND place=?",(username,place,))
+	var=cur.fetchone()
+	#restaurant image is deleted 
+	os.remove(upload+var[0])
+	cur.execute('DELETE FROM approval WHERE username=? AND place=?',(username,place,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))
 
-        cur.execute("SELECT filename FROM approval WHERE username=%s AND place=%s", (username, place,))
-        filename = cur.fetchone()
 
-        if filename:
-            # Delete restaurant image
-            os.remove(os.path.join(upload, filename[0]))
-
-            cur.execute('DELETE FROM approval WHERE username=%s AND place=%s', (username, place,))
-            conn.commit()
-
-        return redirect(url_for('admin'))
-
-    except psycopg2.Error as e:
-        print(f"Database error: {e}")
-        if conn:
-            conn.rollback()
-        return "An error occurred while removing the request."
-
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
+#when admin wants to approve the request of new restaurant
 @app.route('/admin_approve/<username>/<place>')
-def admin_approve(username, place):
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
+def admin_approve(username,place):
+    # role="manager"
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()	
+	cur.execute('SELECT * FROM approval WHERE username=? AND place=?',(username,place,))
+	var=cur.fetchone()
+ 
+	#to create entry in managers table 
+	cur.execute("INSERT INTO managers(username,password,filename,place,location,phone,start,stop,email,role,name) values(?,?,?,?,?,?,?,?,?,?,?)",(var[0],var[1],var[2],var[3],var[4],var[5],var[6],var[7],var[8],var[9],var[10]))
+	cur.execute("DELETE FROM approval WHERE username=? AND place=?",(username,place,))
+	conn.commit()
 
-        cur.execute('SELECT * FROM approval WHERE username=%s AND place=%s', (username, place,))
-        approval = cur.fetchone()
 
-        if approval:
-            cur.execute("""
-                INSERT INTO managers(username, password, filename, place, location, phone, start, stop, email)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, approval)
 
-            cur.execute('DELETE FROM approval WHERE username=%s AND place=%s', (username, place,))
-            conn.commit()
+	#to create username table in corresponding place database
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("CREATE TABLE {}(item TEXT NOT NULL, def TEXT, price INTEGER NOT NULL, category TEXT, dish_image TEXT, id INTEGER PRIMARY KEY AUTOINCREMENT,company TEXT)".format(username))
 
-            # Create user-specific table in the corresponding place database
-            db_name = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-            with psycopg2.connect(f"dbname={db_name} user='tastyh_user' password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA' host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com' port='5432'") as place_conn:
-                place_cur = place_conn.cursor()
-                place_cur.execute(f"""
-                    CREATE TABLE IF NOT EXISTS {username}_orders (
-                        item TEXT NOT NULL,
-                        def TEXT,
-                        price INTEGER NOT NULL,
-                        category TEXT,
-                        dish_image TEXT,
-                        id SERIAL PRIMARY KEY
-                    )
-                """)
-                place_conn.commit()
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))
 
-        return redirect(url_for('admin'))
 
-    except psycopg2.Error as e:
-        print(f"Database error: {e}")
-        if conn:
-            conn.rollback()
-        return "An error occurred while approving the request."
 
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
-
+#when admin wants to remove message
 @app.route("/admin_message_remove/<username>/<subject>")
-def admin_message_remove(username, subject):
-    conn = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-
-        cur.execute("DELETE FROM messages WHERE username=%s AND subject=%s", (username, subject,))
-        conn.commit()
-
-        return redirect(url_for('admin'))
-
-    except psycopg2.Error as e:
-        print(f"Database error: {e}")
-        if conn:
-            conn.rollback()
-        return "An error occurred while removing the message."
-
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
+def admin_message_remove(username,subject):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM messages WHERE username=? and subject=?",(username,subject,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))
 
 
-@app.route('/admin_homepage')
-def admin_homepage():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("SELECT username, place FROM approval")
-    approvals = cur.fetchall()
-    
-    cur.execute("SELECT username, place FROM managers")
-    managers = cur.fetchall()
-    
-    conn.close()
-    return render_template('admin_homepage.html', approvals=approvals, managers=managers)
+@app.route('/promote')
+def promote():
+	return render_template('promotion.html')
 
-@app.route('/admin_approval/<place>/<username>')
-def admin_approval(place, username):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("SELECT * FROM approval WHERE place=%s AND username=%s", (place, username))
-    approval_info = cur.fetchone()
-    
-    conn.close()
-    return render_template('admin_approval.html', var=approval_info)
+#when admin wants to send response to customers
+@app.route('/response_form/<username>/<sub>')
+def response_form(username,sub):
+	return render_template('response_form.html',username=username,sub=sub)
 
-# @app.route('/admin_approve/<place>/<username>', methods=['POST'])
-# def admin_approve(place, username):
-#     conn = get_db_connection()
-#     cur = conn.cursor()
-    
-#     cur.execute("SELECT * FROM approval WHERE place=%s AND username=%s", (place, username))
-#     approval_info = cur.fetchone()
-    
-#     if approval_info:
-#         cur.execute("INSERT INTO managers (username, place, password, filename, location, phone, start, stop, email, role, name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-#                     (username, place, approval_info[1], approval_info[2], approval_info[3], approval_info[4], approval_info[5], approval_info[6], approval_info[7], approval_info[8], approval_info[9]))
-        
-#         cur.execute("DELETE FROM approval WHERE place=%s AND username=%s", (place, username))
-    
-#     conn.commit()
-#     conn.close()
-#     return redirect(url_for('admin_homepage'))
 
-# @app.route('/admin_delete/<place>/<username>', methods=['POST'])
-# def admin_delete(place, username):
-#     conn = get_db_connection()
-#     cur = conn.cursor()
-    
-#     cur.execute("DELETE FROM managers WHERE place=%s AND username=%s", (place, username))
-#     cur.execute("DELETE FROM reviews WHERE place=%s AND username=%s", (place, username))
-#     cur.execute("DELETE FROM rating WHERE place=%s AND username=%s", (place, username))
-#     cur.execute("DELETE FROM orders WHERE place=%s AND username=%s", (place, username))
-    
-#     conn.commit()
-#     conn.close()
-#     return redirect(url_for('admin_homepage'))
+#insert querys to response table
+@app.route('/response/<username>/<sub>',methods=['GET','POST'])
+def response(username,sub):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	message=request.form['message']
+	cur.execute("DELETE FROM messages WHERE username=? AND subject=?",(username,sub,))
+	cur.execute("INSERT INTO response(username,sub,message,sender) VALUES(?,?,?,?)",(username,sub,message,'admin',))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))	
 
 
 
+#when admin wants to remove an existing restaurant	
+@app.route('/admin_manage_remove/<username>/<place>')
+def admin_manage_remove(username,place):
+	upload='static/restaurants/'
+	upload_dish='static/dish/'
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT filename FROM managers WHERE username=? AND place=?",(username,place,))
+	var=cur.fetchone()
+	
+	#restaurant image is deleted 
+	os.remove(upload+var[0])
+
+
+	cur.execute('DELETE FROM managers WHERE username=? AND place=?',(username,place,))
+	cur.execute("DELETE FROM rating WHERE place=? AND rest=?",(place,username,))
+	cur.execute("DELETE FROM most_ordered WHERE place=? AND rest=?",(place,username,))
+	conn.commit()
+	conn.close()
+
+	#to delete username table in corresponding place database
+	if(place=='Accra'):
+		conn=sqlite3.connect('Accra.db')
+	elif(place=='Kumasi'):
+		conn=sqlite3.connect('Kumasi.db')
+	else:
+		conn=sqlite3.connect('location.db')	
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM {}".format(username))
+	var=cur.fetchall()
+	for x in var:
+		os.remove(upload_dish+x[4])
+	cur.execute("DROP TABLE {}".format(username))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))
+
+
+
+#when admin wants to send notification to managers
+@app.route('/notification_form/<rest>/<place>')
+def notification_form(rest,place):
+	return render_template('notification_form.html',rest=rest,place=place)
+
+
+#insert querys to notification table
+@app.route('/notification/<place>/<rest>',methods=['GET','POST'])
+def notification(place,rest):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	message=request.form['message']
+	cur.execute("INSERT INTO notification VALUES(?,?,?)",(place,rest,message,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin'))
+
+
+#to show restaurants table for reviews
+@app.route('/admin_review')
+def admin_review():
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT rest,place FROM reviews GROUP BY rest,place")
+	var=cur.fetchall()
+	conn.close()
+	return render_template('admin_review.html',var=var)
+
+
+#to show reviews of selected restaurant
+@app.route('/admin_review_show/<place>/<rest>')
+def admin_review_show(place,rest):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("SELECT * FROM reviews WHERE place=? AND rest=?",(place,rest,))
+	reviews=cur.fetchall()
+	return render_template('admin_review_show.html',reviews=reviews,place=place,rest=rest)
+
+
+#when admin wants to remove a review
+@app.route('/admin_review_remove/<place>/<rest>/<id_>')
+def admin_review_remove(place,rest,id_):
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	cur.execute("DELETE FROM reviews WHERE id=?",(id_,))
+	conn.commit()
+	conn.close()
+	return redirect(url_for('admin_review_show',place=place,rest=rest))
 
 
 if __name__ == '__main__':
