@@ -432,9 +432,9 @@ def customer_signed_up():
 	cur=conn.cursor()
 	
 	cur.execute("INSERT INTO customers(username,password) VALUES (?,?)",(session['username'],password))
-	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT)".format("_"+session['username']))
+	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,id INTEGER PRIMARY KEY AUTOINCREMENT)".format("_"+session['username']))
 	temp="_"+session['username']+'_orders'
-	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT);".format(temp))
+	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT,id INTEGER PRIMARY KEY AUTOINCREMENT);".format(temp))
 	conn.commit()
 	return redirect(url_for('homepage_customer'))
 
