@@ -1677,6 +1677,170 @@ def manager_delete(place, username):
     conn.close()
     return redirect(url_for('manager_menu', place=place, username=username))
 
+
+
+
+def get_db():
+    """Return a PostgreSQL database connection."""
+    return psycopg2.connect(
+        dbname='tastyh',
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
+
+@app.route('/admin_access')
+def admin_access():
+    return render_template('admin_access.html')
+
+@app.route('/admin')
+def admin():
+    conn = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute('SELECT * FROM approval')
+        approvals = cur.fetchall()
+
+        cur.execute("SELECT username FROM customers")
+        customers = cur.fetchall()
+
+        cur.execute('SELECT * FROM managers WHERE place=%s', ('Accra',))
+        managers_Accra = cur.fetchall()
+
+        cur.execute('SELECT * FROM managers WHERE place=%s', ('Kumasi',))
+        managers_Kumasi = cur.fetchall()
+
+        cur.execute('SELECT * FROM managers WHERE place=%s', ('location',))
+        managers_location = cur.fetchall()
+
+        cur.execute("SELECT * FROM messages")
+        messages = cur.fetchall()
+
+        return render_template(
+            'admin.html',
+            approvals=approvals,
+            managers_Accra=managers_Accra,
+            managers_Kumasi=managers_Kumasi,
+            managers_location=managers_location,
+            messages=messages,
+            customers=customers
+        )
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return "An error occurred while fetching data."
+    
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+@app.route('/admin_remove/<username>/<place>')
+def admin_remove(username, place):
+    upload = 'static/restaurants/'
+    conn = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("SELECT filename FROM approval WHERE username=%s AND place=%s", (username, place,))
+        filename = cur.fetchone()
+
+        if filename:
+            # Delete restaurant image
+            os.remove(os.path.join(upload, filename[0]))
+
+            cur.execute('DELETE FROM approval WHERE username=%s AND place=%s', (username, place,))
+            conn.commit()
+
+        return redirect(url_for('admin'))
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        if conn:
+            conn.rollback()
+        return "An error occurred while removing the request."
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+@app.route('/admin_approve/<username>/<place>')
+def admin_approve(username, place):
+    conn = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute('SELECT * FROM approval WHERE username=%s AND place=%s', (username, place,))
+        approval = cur.fetchone()
+
+        if approval:
+            cur.execute("""
+                INSERT INTO managers(username, password, filename, place, location, phone, start, stop, email)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, approval)
+
+            cur.execute('DELETE FROM approval WHERE username=%s AND place=%s', (username, place,))
+            conn.commit()
+
+            # Create user-specific table in the corresponding place database
+            db_name = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
+            with psycopg2.connect(f"dbname={db_name} user='tastyh_user' password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA' host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com' port='5432'") as place_conn:
+                place_cur = place_conn.cursor()
+                place_cur.execute(f"""
+                    CREATE TABLE IF NOT EXISTS {username}_orders (
+                        item TEXT NOT NULL,
+                        def TEXT,
+                        price INTEGER NOT NULL,
+                        category TEXT,
+                        dish_image TEXT,
+                        id SERIAL PRIMARY KEY
+                    )
+                """)
+                place_conn.commit()
+
+        return redirect(url_for('admin'))
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        if conn:
+            conn.rollback()
+        return "An error occurred while approving the request."
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+@app.route("/admin_message_remove/<username>/<subject>")
+def admin_message_remove(username, subject):
+    conn = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("DELETE FROM messages WHERE username=%s AND subject=%s", (username, subject,))
+        conn.commit()
+
+        return redirect(url_for('admin'))
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        if conn:
+            conn.rollback()
+        return "An error occurred while removing the message."
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+
 @app.route('/admin_homepage')
 def admin_homepage():
     conn = get_db_connection()
