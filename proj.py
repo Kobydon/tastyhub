@@ -424,59 +424,19 @@ def customer_logged_in():
 	return redirect(url_for('homepage_customer'))
 
 #customer session created after sign up
-@app.route('/customer_signed_up', methods=['GET', 'POST'])
+@app.route('/customer_signed_up',methods=['GET','POST'])
 def customer_signed_up():
-    # Retrieve username and password from the form data
-    username = request.form['username']
-    password = request.form['password']
-
-    # Store the username in the session
-    session['username'] = username
-
-    # Connect to the SQLite database
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-
-    # Insert the new customer into the 'customers' table
-    cur.execute("INSERT INTO customers (username, password) VALUES (?, ?)", (username, password))
-
-    # Create a table specific to the new customer for storing items
-    customer_table = f"_{username}"
-    cur.execute(f"""
-        CREATE TABLE IF NOT EXISTS {customer_table} (
-            item TEXT NOT NULL,
-            price INTEGER,
-            qty TEXT,
-            total INTEGER,
-            place TEXT,
-            rest TEXT,
-            dish_image TEXT,
-            id INTEGER PRIMARY KEY AUTOINCREMENT
-        )
-    """)
-
-    # Create an 'orders' table for the new customer if it doesn't exist
-    orders_table = f"_{username}_orders"
-    cur.execute(f"""
-        CREATE TABLE IF NOT EXISTS {orders_table} (
-            item TEXT NOT NULL,
-            price INTEGER,
-            qty TEXT,
-            total INTEGER,
-            place TEXT,
-            rest TEXT,
-            dish_image TEXT,
-            date TEXT,
-            id INTEGER PRIMARY KEY AUTOINCREMENT
-        )
-    """)
-
-    # Commit the changes and close the database connection
-    conn.commit()
-    conn.close()
-
-    # Redirect the user to the customer homepage
-    return redirect(url_for('homepage_customer'))
+	session['username']=request.form['username']             #session is a dictionery with username its key.. value is nm variable
+	password=request.form['password']
+	conn=sqlite3.connect('members.db')
+	cur=conn.cursor()
+	
+	cur.execute("INSERT INTO customers(username,password) VALUES (?,?)",(session['username'],password))
+	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT)".format("_"+session['username']))
+	temp="_"+session['username']+'_orders'
+	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT);".format(temp))
+	conn.commit()
+	return redirect(url_for('homepage_customer'))
 
 
 #when customer wants to logout
