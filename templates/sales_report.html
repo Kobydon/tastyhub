@@ -562,27 +562,7 @@ th{
 </head>
 
 <body>
-<h1>
-<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60">
-<span class="h1span">
 
-TastyHub</span>
-<span>
-<a href="/manager_logout" class="login_menu">LOGOUT</></a>
-<a href="/help" class="help">HELP</></a>
-<a class="button" href="#popup1">MESSAGES</a>
-<a class="button" href="#popup2">NOTIFICATIONS</a>
-{% if new_orders > 0 %}
-    <a class="button" id="order" href="{{ url_for('m_orders') }}">Orders</a>
-{% else %}
-    <a class="button"  href="{{ url_for('m_orders') }}">Orders</a>
-{% endif %}
-<a class="button" href="{{url_for('search_report')}}">Sales Report</a>
-<a href="/reviews_manager/{{place}}" class="help">REVIEWS</></a>
-
-
-</span>
-</h1>
 
 <div class="content2"></div>
 <br>
