@@ -1,6 +1,21 @@
 <html>
 <head>
-<link type="text/css" href="{{url_for('static',filename='webpages.css')}}" rel="stylesheet"/>
+	
+		
+	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='search/css/component.css')}}" />
+	<script src="{{url_for('static',filename='search/js/modernizr.custom.js')}}"></script>
+	
+	
+
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- <link type="text/css" href="{{url_for('static',filename='webpages.css')}}" rel="stylesheet"/> -->
 <style>
 body
 {
@@ -19,23 +34,81 @@ body
 	color:rgb(10,10,110);
 	font-size:20px;
 }
+
+.navbar {
+    font-family: Montserrat, sans-serif;
+    margin-bottom: 0;
+    background-color: #2d2d30;
+    border: 0;
+    font-size: 11px !important;
+    letter-spacing: 4px;
+    opacity: 0.9;
+  }
+  .navbar li a, .navbar .navbar-brand { 
+    color: #d5d5d5 !important;
+  }
+  .navbar-nav li a:hover {
+    color: #fff !important;
+  }
+  .navbar-nav li.active a {
+    color: #fff !important;
+    background-color: #29292c !important;
+  }
+  .navbar-default .navbar-toggle {
+    border-color: transparent;
+  }
+  .open .dropdown-toggle {
+    color: #fff;
+    background-color: #555 !important;
+  }
+  .dropdown-menu li a {
+    color: #000 !important;
+  }
+  .dropdown-menu li a:hover {
+    background-color: red !important;
+  }
 </style>
 </head>
 <body>
-<h1>
-<a href="/homepage_customer">
-<img src="{{url_for('static',filename='food.jpg')}}"  width="80" height="60"></a>
-<span class="h1span">
 
-TastyHub</span>
-<span>
-<a href="/customer_logout" class="login">LOGOUT</></a>
-<a href="/help" class="help">HELP</></a>
-<a href="/cartshow" class="help">CART</a>
-<a href="/orders" class="help">MY ORDERS</a>
 
-</span>
-</h1>
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>                        
+			</button>
+		  <h4 style="color: aliceblue;">TastyHub</h4>
+		  </div>
+		  <div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav navbar-right">
+			  <li><a href="/homepage_customer" class="button">Home</a></li>
+			  <li><a href="/cartshow" class="help">CART <i class="fa fa-shopping-cart"></i></a></li> 
+			<li><a href="/orders" class="help">MY ORDERS <i class="fa fa-th"></i></a></li>  
+			  
+			  <!-- <li>	<a class="button" href="#popup1">MESSAGES <i class="fa fa-envelope"></i></a></li> -->
+		<li>	<a href="/contact" class="button">Contact   </a></li>
+		<li class="dropdown">
+			<a class="dropdown-toggle" data-toggle="dropdown" href="#">Search
+			<span class="caret"></span></a>
+			<ul class="dropdown-menu">
+			  <li><a href="#search">Dish,Restaurant</a></li>
+			  <li><a href="#location">Location</a></li>
+		  
+			</ul>
+		  </li>
+	 
+		
+		<li> <a href="/logout" class="login_menu">LOGOUT</></a></li>
+		<li><a href="/help" class="help"></a></li>
+	
+		
+			</ul>
+		  </div>
+		</div>
+	  </nav>
 
 
 <div class="content">
@@ -50,21 +123,7 @@ TastyHub</span>
 
 
 <!-- menu -->
-	<nav>
-		<img class="menu_image" src="{{url_for('static',filename='food.jpg')}}"  width="70" height="70">
-		<br>
-		<span class="menu_heading">TastyHub</span>
-		<ul>
-			<li><a class="nava" href="/homepage_customer">Home</a></li>
-			<li><a class="nava" href="/about">About Us</a></li>
-			<li><a class="nava" href="/contact">Contact</a></li>
-			<li><a class="nava" href="/privacy_policy">Privacy Policy</a></li>
-			<li><a class="nava" href="/security">Security</a></li>		
-			<li><a class="nava" href="/terms">Terms</a></li>		
-		
-		</ul>
-	</nav>
-
+	
 
 
 <div class="last" >

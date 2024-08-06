@@ -259,7 +259,7 @@ imageAnimation
 }
 .carousel-inner img {
     -webkit-filter: grayscale(50%);
-    filter: grayscale(10%); /* make all photos black and white */ 
+    filter: grayscale(0%); /* make all photos black and white */ 
     width: 100%; /* Set width to 100% */
     margin: auto;
 	height: 50%;
@@ -406,12 +406,23 @@ else
 		  </div>
 		  <div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav navbar-right">
-			  <li><a href="/home" class="button">Home</a></li>
+			  <li><a href="/homepage_customer" class="button">Home</a></li>
 			  <li><a href="/cartshow" class="help">CART <i class="fa fa-shopping-cart"></i></a></li> 
 			<li><a href="/orders" class="help">MY ORDERS <i class="fa fa-th"></i></a></li>  
 			  
-			  <li>	<a class="button" href="#popup1">MESSAGES <i class="fa fa-envelope"></i></a></li>
-		<li>	<a href="/contact" class="button">Contact </a></li>
+			  <!-- <li>	<a class="button" href="#popup1">MESSAGES <i class="fa fa-envelope"></i></a></li> -->
+		<li>	<a href="/contact" class="button">Contact   </a></li>
+		<li class="dropdown">
+			<a class="dropdown-toggle" data-toggle="dropdown" href="#">Search
+			<span class="caret"></span></a>
+			<ul class="dropdown-menu">
+			  <li><a href="#search">Dish,Restaurant</a></li>
+			  <li><a href="#location">Location</a></li>
+		  
+			</ul>
+		  </li>
+	 
+		
 		<li> <a href="/logout" class="login_menu">LOGOUT</></a></li>
 		<li><a href="/help" class="help"></a></li>
 	
@@ -543,19 +554,6 @@ Order food online from the best restaurants near you
 </span>	
 
 <br>
-<form onsubmit='makePath(this);'>
-
-<select id="location" class="place" required>
-  <option class="placeo" value="">None</option>
-  <option class="placeo" value="/Accra">Accra</option>
-  <option class="placeo" value="/Kumasi">Kumasi</option>
-  <option class="placeo" value="/Takoradi">Takoradi</option>
-</select>
-
-<button class="showrestaurants">FIND RESTAURANTS</button>
-</form>
-<br>
-<br>
 <br>
 <br>
 <br>
@@ -586,7 +584,7 @@ Order food online from the best restaurants near you
 <br>
 <br>
 
-<img src="{{url_for('static',filename='ordering.jpg')}}" width="100%" height="450">
+<img src="{{url_for('static',filename='ordering.jpg')}}"  width="100%" height="450">
 
 
 
@@ -595,6 +593,20 @@ Order food online from the best restaurants near you
 	
 
 <div class="last" >
+	
+<br>
+<form onsubmit='makePath(this);'>
+
+<select id="location" class="place" required>
+  <option class="placeo" value="">None</option>
+  <option class="placeo" value="/Accra">Accra</option>
+  <option class="placeo" value="/Kumasi">Kumasi</option>
+  <option class="placeo" value="/Takoradi">Takoradi</option>
+</select>
+
+<button class="showrestaurants">FIND RESTAURANTS</button>
+</form>
+<br>
 <br>
 <div class="motto">
 We uphold the motto <span class="bullet">“making online food ordering fast and easy”</span>. Our service allows you<br> to find all of the restaurants available nearby, which can deliver to your house
