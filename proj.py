@@ -1680,6 +1680,13 @@ def manager_delete(place, username):
 
 
 
+
+
+@app.route('/admin_access')
+def admin_access():
+    return render_template('admin_access.html')
+
+
 def get_db():
     """Return a PostgreSQL database connection."""
     return psycopg2.connect(
@@ -1689,11 +1696,6 @@ def get_db():
         host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
         port='5432'
     )
-
-@app.route('/admin_access')
-def admin_access():
-    return render_template('admin_access.html')
-
 @app.route('/admin')
 def admin():
     conn = None
