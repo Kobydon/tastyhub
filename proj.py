@@ -1519,14 +1519,27 @@ def forget_password():
     session.pop("username", None)
     return render_template("forget.html")
 
+
+def get_db_connection():
+    """Return a PostgreSQL database connection."""
+    return psycopg2.connect(
+        dbname='tastyh',
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
+
 @app.route('/manager_homepage/<place>', methods=['GET', 'POST'])
 def manager_homepage(place):
-    db_file = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-    conn = sqlite3.connect(db_file)
+    # Here, PostgreSQL is used for database access
+    conn = get_db_connection()
     cur = conn.cursor()
     
     username = session.get('username')
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    
+    # Fetch tables for the given place
+    cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
     tables = cur.fetchall()
     
     conn.close()
@@ -1538,9 +1551,9 @@ def go_manager():
     if username is None:
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('members.db')
+    conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT place FROM managers WHERE username=?", (username,))
+    cur.execute("SELECT place FROM managers WHERE username=%s", (username,))
     place_row = cur.fetchone()
     conn.close()
 
@@ -1552,8 +1565,13 @@ def go_manager():
 
 @app.route('/manager_menu/<place>/<username>')
 def manager_menu(place, username):
-    db_file = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-    conn = sqlite3.connect(db_file)
+    conn = psycopg2.connect(
+        dbname=f"{place}",
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
     cur = conn.cursor()
     
     cur.execute(f"SELECT * FROM {username}")
@@ -1621,24 +1639,39 @@ def manager_edit_restaurant(place, username):
 @app.route('/manager_edit/<place>/<username>/<action>', methods=['GET', 'POST'])
 def manager_edit(place, username, action):
     if action == "add":
-        db_file = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-        conn = sqlite3.connect(db_file)
+        conn = psycopg2.connect(
+            dbname=f"{place}",
+            user='tastyh_user',
+            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+            port='5432'
+        )
         cur = conn.cursor()
         cur.execute(f"SELECT item FROM {username}")
         items = cur.fetchall()
         conn.close()
         return render_template('manager_add.html', var=items, place=place, username=username)
     elif action == "update":
-        db_file = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-        conn = sqlite3.connect(db_file)
+        conn = psycopg2.connect(
+            dbname=f"{place}",
+            user='tastyh_user',
+            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+            port='5432'
+        )
         cur = conn.cursor()
         cur.execute(f"SELECT item FROM {username}")
         items = cur.fetchall()
         conn.close()
         return render_template('manager_update.html', var=items, place=place, username=username)
     elif action == "delete":
-        db_file = f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db'
-        conn = sqlite3.connect(db_file)
+        conn = psycopg2.connect(
+            dbname=f"{place}",
+            user='tastyh_user',
+            password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+            host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+            port='5432'
+        )
         cur = conn.cursor()
         cur.execute(f"SELECT item FROM {username}")
         items = cur.fetchall()
@@ -1649,9 +1682,15 @@ def manager_edit(place, username, action):
 def manager_add(place, username):
     item = request.form['item']
     price = request.form['price']
-    conn = sqlite3.connect(f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db')
+    conn = psycopg2.connect(
+        dbname=f"{place}",
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
     cur = conn.cursor()
-    cur.execute(f"INSERT INTO {username} (item, price) VALUES (?, ?)", (item, price))
+    cur.execute(f"INSERT INTO {username} (item, price) VALUES (%s, %s)", (item, price))
     conn.commit()
     conn.close()
     return redirect(url_for('manager_menu', place=place, username=username))
@@ -1660,9 +1699,15 @@ def manager_add(place, username):
 def manager_update(place, username):
     item = request.form['item']
     new_price = request.form['new_price']
-    conn = sqlite3.connect(f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db')
+    conn = psycopg2.connect(
+        dbname=f"{place}",
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
     cur = conn.cursor()
-    cur.execute(f"UPDATE {username} SET price=? WHERE item=?", (new_price, item))
+    cur.execute(f"UPDATE {username} SET price=%s WHERE item=%s", (new_price, item))
     conn.commit()
     conn.close()
     return redirect(url_for('manager_menu', place=place, username=username))
@@ -1670,14 +1715,18 @@ def manager_update(place, username):
 @app.route('/manager_delete/<place>/<username>', methods=['POST'])
 def manager_delete(place, username):
     item = request.form['item']
-    conn = sqlite3.connect(f"{place}.db" if place in ['Accra', 'Kumasi'] else 'location.db')
+    conn = psycopg2.connect(
+        dbname=f"{place}",
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
     cur = conn.cursor()
-    cur.execute(f"DELETE FROM {username} WHERE item=?", (item,))
+    cur.execute(f"DELETE FROM {username} WHERE item=%s", (item,))
     conn.commit()
     conn.close()
     return redirect(url_for('manager_menu', place=place, username=username))
-
-
 
 
 
