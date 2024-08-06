@@ -4,7 +4,7 @@ import sys
 import cgi, os
 import cgitb; cgitb.enable()
 from werkzeug.utils import secure_filename
-
+import re
 from flask_mail import Mail, Message
 import time
 from datetime import datetime
@@ -417,25 +417,93 @@ def customer():
     conn.close()
     return render_template('customer.html', var=var)
 
+
+
 @app.route('/customer_logged_in', methods=['GET', 'POST'])
 def customer_logged_in():
     session['username'] = request.form['username']
     return redirect(url_for('homepage_customer'))
 
+from flask import Flask, request, session, redirect, url_for
+
+
+
+
+
+def get_db():
+    # Your database connection logic here
+    pass
+
+def safe_table_name(name):
+    """Sanitize the table name to ensure it follows PostgreSQL naming rules."""
+    # Replace non-alphanumeric characters with underscores
+    name = re.sub(r'\W|^(?=\d)', '_', name)
+    return name
+
 @app.route('/customer_signed_up', methods=['GET', 'POST'])
 def customer_signed_up():
-    session['username'] = request.form['username']
-    password = request.form['password']
-    conn = get_db()
-    cur = conn.cursor()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Save username to session
+        session['username'] = username
+        
+        conn = None
+        try:
+            conn = get_db()
+            cur = conn.cursor()
+            
+            # Insert into customers table
+            cur.execute("INSERT INTO customers (username, password) VALUES (%s, %s)", (username, password))
+            
+            # Sanitize table names
+            sanitized_username = safe_table_name(username)
+            table_name = f"{sanitized_username}_orders"
+            
+            # Create tables
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {sanitized_username} (
+                    item TEXT NOT NULL,
+                    price INTEGER,
+                    qty TEXT,
+                    total INTEGER,
+                    place TEXT,
+                    rest TEXT,
+                    dish_image TEXT
+                )
+            """)
+            
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    item TEXT NOT NULL,
+                    price INTEGER,
+                    qty TEXT,
+                    total INTEGER,
+                    place TEXT,
+                    rest TEXT,
+                    dish_image TEXT,
+                    date TEXT
+                )
+            """)
+            
+            # Commit changes
+            conn.commit()
+            
+        except psycopg2.Error as e:
+            # Print or log error
+            print(f"An error occurred: {e}")
+            if conn:
+                conn.rollback()
+        
+        finally:
+            if conn:
+                conn.close()
+        
+        return redirect(url_for('homepage_customer'))
     
-    cur.execute("INSERT INTO customers(username, password) VALUES (%s, %s)", (session['username'], password))
-    cur.execute(f"CREATE TABLE IF NOT EXISTS _{session['username']}(item TEXT NOT NULL, price INTEGER, qty TEXT, total INTEGER, place TEXT, rest TEXT, dish_image TEXT)")
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {session['username']}_orders(item TEXT NOT NULL, price INTEGER, qty TEXT, total INTEGER, place TEXT, rest TEXT, dish_image TEXT, date TEXT)")
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('homepage_customer'))
+    return "Invalid request method.", 405
+
 
 
  # Replace with your actual secret key
