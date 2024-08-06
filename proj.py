@@ -1866,37 +1866,37 @@ def admin_approval(place, username):
     conn.close()
     return render_template('admin_approval.html', var=approval_info)
 
-@app.route('/admin_approve/<place>/<username>', methods=['POST'])
-def admin_approve(place, username):
-    conn = get_db_connection()
-    cur = conn.cursor()
+# @app.route('/admin_approve/<place>/<username>', methods=['POST'])
+# def admin_approve(place, username):
+#     conn = get_db_connection()
+#     cur = conn.cursor()
     
-    cur.execute("SELECT * FROM approval WHERE place=%s AND username=%s", (place, username))
-    approval_info = cur.fetchone()
+#     cur.execute("SELECT * FROM approval WHERE place=%s AND username=%s", (place, username))
+#     approval_info = cur.fetchone()
     
-    if approval_info:
-        cur.execute("INSERT INTO managers (username, place, password, filename, location, phone, start, stop, email, role, name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (username, place, approval_info[1], approval_info[2], approval_info[3], approval_info[4], approval_info[5], approval_info[6], approval_info[7], approval_info[8], approval_info[9]))
+#     if approval_info:
+#         cur.execute("INSERT INTO managers (username, place, password, filename, location, phone, start, stop, email, role, name) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+#                     (username, place, approval_info[1], approval_info[2], approval_info[3], approval_info[4], approval_info[5], approval_info[6], approval_info[7], approval_info[8], approval_info[9]))
         
-        cur.execute("DELETE FROM approval WHERE place=%s AND username=%s", (place, username))
+#         cur.execute("DELETE FROM approval WHERE place=%s AND username=%s", (place, username))
     
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin_homepage'))
+#     conn.commit()
+#     conn.close()
+#     return redirect(url_for('admin_homepage'))
 
-@app.route('/admin_delete/<place>/<username>', methods=['POST'])
-def admin_delete(place, username):
-    conn = get_db_connection()
-    cur = conn.cursor()
+# @app.route('/admin_delete/<place>/<username>', methods=['POST'])
+# def admin_delete(place, username):
+#     conn = get_db_connection()
+#     cur = conn.cursor()
     
-    cur.execute("DELETE FROM managers WHERE place=%s AND username=%s", (place, username))
-    cur.execute("DELETE FROM reviews WHERE place=%s AND username=%s", (place, username))
-    cur.execute("DELETE FROM rating WHERE place=%s AND username=%s", (place, username))
-    cur.execute("DELETE FROM orders WHERE place=%s AND username=%s", (place, username))
+#     cur.execute("DELETE FROM managers WHERE place=%s AND username=%s", (place, username))
+#     cur.execute("DELETE FROM reviews WHERE place=%s AND username=%s", (place, username))
+#     cur.execute("DELETE FROM rating WHERE place=%s AND username=%s", (place, username))
+#     cur.execute("DELETE FROM orders WHERE place=%s AND username=%s", (place, username))
     
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin_homepage'))
+#     conn.commit()
+#     conn.close()
+#     return redirect(url_for('admin_homepage'))
 
 
 
