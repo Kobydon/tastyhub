@@ -1564,7 +1564,7 @@ def m_orders():
     if var:
         return render_template('manager_order.html', var=var, new_orders=new_orders)
     else:
-        return render_template('no_orders.html')
+        return render_template('manager_order.html', var=var, new_orders=new_orders)
 
 
 
