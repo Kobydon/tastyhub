@@ -1162,50 +1162,85 @@ def cancel_advert(id):
         cur.close()
         conn.close()
 
-@app.route("/cancel_order_customer/<id>")
+
+def get_db():
+    """Return a database connection."""
+    return psycopg2.connect(
+        dbname='tastyh',
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
+
+def safe_table_name(name):
+    """Sanitize the table name to ensure it follows PostgreSQL naming rules."""
+    sanitized_name = re.sub(r'\W|^(?=\d)', '_', name)
+    if sanitized_name[0].isdigit():
+        sanitized_name = '_' + sanitized_name
+    return sanitized_name
+
+@app.route("/cancel_order_customer/<int:id>")
 def cancel_order_customer(id):
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-
+    conn = None
     try:
-        cur.execute("SELECT * FROM orders WHERE id=?", (id,))
+        conn = get_db()
+        cur = conn.cursor()
+        
+        cur.execute("SELECT * FROM orders WHERE id=%s", (id,))
         if cur.fetchone():
-            cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = ?", (id,))
+            cur.execute("UPDATE orders SET approve = 'Cancelled' WHERE id = %s", (id,))
             conn.commit()
-        return redirect(url_for('orders'))
-
-    finally:
-        cur.close()
-        conn.close()
-
-@app.route("/remove_quantity/<id>")
-def remove_quantity(id):
-    find_table = "_" + session["username"]
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-
-    try:
-        cur.execute(f"SELECT * FROM {find_table} WHERE id=?", (id,))
-        if cur.fetchone():
-            cur.execute(f"UPDATE {find_table} SET qty = qty - 1 WHERE id = ?", (id,))
-            cur.execute(f"UPDATE {find_table} SET total = qty * price WHERE id = ?", (id,))
-            conn.commit()
+        
         return redirect(url_for('cartshow'))
 
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        if conn:
+            conn.rollback()
+        
     finally:
-        cur.close()
-        conn.close()
+        if conn:
+            cur.close()
+            conn.close()
+
+@app.route("/remove_quantity/<int:id>")
+def remove_quantity(id):
+    user_table = safe_table_name(session.get("username", ""))  # Safeguard against missing username
+    conn = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        cur.execute(f"SELECT * FROM {user_table} WHERE id=%s", (id,))
+        if cur.fetchone():
+            cur.execute(f"UPDATE {user_table} SET qty = qty - 1 WHERE id = %s", (id,))
+            cur.execute(f"UPDATE {user_table} SET total = qty * price WHERE id = %s", (id,))
+            conn.commit()
+        
+        return redirect(url_for('cartshow'))
+
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        if conn:
+            conn.rollback()
+        
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
 
 @app.route('/cartshow')
 def cartshow():
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-
+    conn = None
     try:
+        conn = get_db()
+        cur = conn.cursor()
+
         cur.execute("SELECT * FROM managers")
         managers = cur.fetchall()
 
-        user_table = f"_{session['username']}"
+        user_table = safe_table_name(session.get('username', ''))
         cur.execute(f"SELECT COUNT(*) FROM {user_table}")
         item_count = cur.fetchone()[0]
 
@@ -1216,38 +1251,42 @@ def cartshow():
         else:
             return render_template("nocart.html")
 
-    except Exception as e:
+    except psycopg2.Error as e:
         print(f"Error in cartshow: {e}")
         return f"Error in cartshow: {e}"
-
+    
     finally:
-        cur.close()
-        conn.close()
+        if conn:
+            cur.close()
+            conn.close()
 
-@app.route('/cartremove/<item>/<place>/<rest>/<qty>')
+@app.route('/cartremove/<item>/<place>/<rest>/<int:qty>')
 def cartremove(item, place, rest, qty):
-    conn = psycopg2.connect(
-        dbname='tastyh',
-        user='tastyh_user',
-        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
-        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
-        port='5432'
-    )
-    cur = conn.cursor()
-
+    user_table = safe_table_name(session.get('username', ''))
+    conn = None
     try:
-        user_table = f"_{session['username']}"
+        conn = get_db()
+        cur = conn.cursor()
+        
         cur.execute(f"SELECT COUNT(*) FROM {user_table}")
         item_count = cur.fetchone()[0]
 
         if item_count > 0:
             cur.execute(f"DELETE FROM {user_table} WHERE item=%s AND place=%s AND qty=%s", (item, place, qty))
             conn.commit()
+        
         return redirect(url_for('cartshow'))
 
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        if conn:
+            conn.rollback()
+        
     finally:
-        cur.close()
-        conn.close()
+        if conn:
+            cur.close()
+            conn.close()
+
 
 @app.route('/cartpay')
 def cartpay():
