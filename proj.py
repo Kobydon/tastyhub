@@ -424,22 +424,37 @@ def customer_logged_in():
     session['username'] = request.form['username']
     return redirect(url_for('homepage_customer'))
 
+
+
+
+
+
+
+
 from flask import Flask, request, session, redirect, url_for
+import psycopg2
+import re
 
 
-
-
-
-def get_db():
-    # Your database connection logic here
-    pass
 
 def safe_table_name(name):
     """Sanitize the table name to ensure it follows PostgreSQL naming rules."""
     # Replace non-alphanumeric characters with underscores
-    name = re.sub(r'\W|^(?=\d)', '_', name)
-    return name
+    # Ensure the name does not start with a digit
+    sanitized_name = re.sub(r'\W|^(?=\d)', '_', name)
+    if sanitized_name[0].isdigit():
+        sanitized_name = '_' + sanitized_name
+    return sanitized_name
 
+
+def get_db():
+    return psycopg2.connect(
+        dbname='tastyh',
+        user='tastyh_user',
+        password='8YHmGY3f9YwCHXsC3AoIRbJNcO7m0NzA',
+        host='dpg-cqohq7tsvqrc73fh9hhg-a.oregon-postgres.render.com',
+        port='5432'
+    )
 @app.route('/customer_signed_up', methods=['GET', 'POST'])
 def customer_signed_up():
     if request.method == 'POST':
@@ -459,9 +474,9 @@ def customer_signed_up():
             
             # Sanitize table names
             sanitized_username = safe_table_name(username)
-            table_name = f"{sanitized_username}_orders"
+            orders_table_name = f"{sanitized_username}_orders"
             
-            # Create tables
+            # Create tables with sanitized names
             cur.execute(f"""
                 CREATE TABLE IF NOT EXISTS {sanitized_username} (
                     item TEXT NOT NULL,
@@ -475,7 +490,7 @@ def customer_signed_up():
             """)
             
             cur.execute(f"""
-                CREATE TABLE IF NOT EXISTS {table_name} (
+                CREATE TABLE IF NOT EXISTS {orders_table_name} (
                     item TEXT NOT NULL,
                     price INTEGER,
                     qty TEXT,
