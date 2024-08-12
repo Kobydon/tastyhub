@@ -433,7 +433,7 @@ def customer_signed_up():
 	conn=sqlite3.connect('members.db')
 	cur=conn.cursor()
 	
-	cur.execute("INSERT INTO customers(username,password,address,phone) VALUES (?,?)",(session['username'],password,address,phone))
+	cur.execute("INSERT INTO customers(username,password,address,phone) VALUES (?,?,?,?)",(session['username'],password,address,phone))
 	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT)".format("_"+session['username']))
 	temp="_"+session['username']+'_orders'
 	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT);".format(temp))
