@@ -1510,7 +1510,9 @@ def paycard():
 
 #clear items in cart
 
-
+from flask import Flask, session, redirect, url_for
+import sqlite3
+from datetime import datetime
 
 @app.route('/cartclear')
 def cartclear():
@@ -1589,10 +1591,14 @@ def cartclear():
             # Clear the user's cart
             cur.execute(f"DELETE FROM _{username}")
 
+            # Commit the transaction
+            conn.commit()
+
     except sqlite3.Error as e:
         print(f"SQLite error in cartclear: {e}")
     
     return redirect(url_for('orders'))
+
 
 
 #when user wants to see past orders
