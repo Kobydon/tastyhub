@@ -428,10 +428,12 @@ def customer_logged_in():
 def customer_signed_up():
 	session['username']=request.form['username']             #session is a dictionery with username its key.. value is nm variable
 	password=request.form['password']
+	address = request.form["address"]
+	phone = request.form["phone"]
 	conn=sqlite3.connect('members.db')
 	cur=conn.cursor()
 	
-	cur.execute("INSERT INTO customers(username,password) VALUES (?,?)",(session['username'],password))
+	cur.execute("INSERT INTO customers(username,password,address,phone) VALUES (?,?)",(session['username'],password,address,phone))
 	cur.execute("CREATE TABLE {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT)".format("_"+session['username']))
 	temp="_"+session['username']+'_orders'
 	cur.execute("CREATE TABLE IF NOT EXISTS {}(item text NOT NULL ,price INTEGER , qty TEXT ,total INTEGER , place TEXT ,rest TEXT,dish_image TEXT,date TEXT);".format(temp))
@@ -1117,15 +1119,15 @@ def add_quantity(id):
     find_table = "_" + session["username"]
     
     # Check if the item exists in the user's table
-    cur.execute("SELECT * FROM {} WHERE id=?".format(find_table), (id,))
+    cur.execute("SELECT * FROM {} WHERE item=?".format(find_table), (id,))
     check = cur.fetchone()
     
     if check:
         # Update quantity for the item
-        cur.execute("UPDATE {} SET qty = qty + 1 WHERE id = ?".format(find_table), (id,))
+        cur.execute("UPDATE {} SET qty = qty + 1 WHERE item = ?".format(find_table), (id,))
         
         # Update total price for the item based on the updated quantity
-        cur.execute("UPDATE {} SET total = qty * price WHERE id = ?".format(find_table), (id,))
+        cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
         
         conn.commit()
         conn.close()
@@ -1146,8 +1148,58 @@ def approve_order(id):
     check = cur.fetchone()
     
     if check:
-        # Update quantity for the item
+        # Update quantity for the itemdisptach_order
         cur.execute("UPDATE orders SET approve = 'Approved' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
+        conn.close()
+
+    return redirect(url_for('m_orders'))
+
+
+
+@app.route("/dispatch_order/<id>")
+def dispatch_order(id):
+    conn = sqlite3.connect('members.db')
+    cur = conn.cursor()
+    
+    # find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM orders  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the itemdisptach_order
+        cur.execute("UPDATE orders SET approve = 'Dispatched' WHERE id = ?", (id,))
+        
+        # Update total price for the item based on the updated quantity
+        # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
+        
+        conn.commit()
+        conn.close()
+
+    return redirect(url_for('m_orders'))
+
+
+
+@app.route("/deliver_order/<id>")
+def deliver_order(id):
+    conn = sqlite3.connect('members.db')
+    cur = conn.cursor()
+    
+    # find_table = "_" + session["username"]
+    
+    # Check if the item exists in the user's table
+    cur.execute("SELECT * FROM orders  WHERE id=?", (id,))
+    check = cur.fetchone()
+    
+    if check:
+        # Update quantity for the itemdisptach_order
+        cur.execute("UPDATE orders SET approve = 'Delivered' WHERE id = ?", (id,))
         
         # Update total price for the item based on the updated quantity
         # cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
@@ -1374,15 +1426,15 @@ def remove_quantity(id):
     find_table = "_" + session["username"]
     
     # Check if the item exists in the user's table
-    cur.execute("SELECT * FROM {} WHERE id=?".format(find_table), (id,))
+    cur.execute("SELECT * FROM {} WHERE item=?".format(find_table), (id,))
     check = cur.fetchone()
     
     if check:
         # Update quantity for the item
-        cur.execute("UPDATE {} SET qty = qty - 1 WHERE id = ?".format(find_table), (id,))
+        cur.execute("UPDATE {} SET qty = qty - 1 WHERE item = ?".format(find_table), (id,))
         
         # Update total price for the item based on the updated quantity
-        cur.execute("UPDATE {} SET total = qty * price WHERE id = ?".format(find_table), (id,))
+        cur.execute("UPDATE {} SET total = qty * price WHERE item = ?".format(find_table), (id,))
         
         conn.commit()
         conn.close()
@@ -1458,74 +1510,89 @@ def paycard():
 
 #clear items in cart
 
+
+
 @app.route('/cartclear')
 def cartclear():
     if 'username' not in session:
         return redirect(url_for('login'))  # Redirect to login if user not logged in
-    
+
     username = session['username']
     orders_table = f"_{username}_orders"
     current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-    
+
     try:
         with sqlite3.connect('members.db') as conn:
             cur = conn.cursor()
-            
+
             # Backup cart items to user's orders history
             cur.execute(f"SELECT * FROM _{username}")
             cart_items = cur.fetchall()
-            
+
+            # Fetch the phone number of the user
+            cur.execute("SELECT phone FROM managers WHERE username = ?", (username,))
+            user = cur.fetchone()
+            phone = user[0] if user else None
+
             for item in cart_items:
                 # Move items to orders history
-                cur.execute(f"INSERT INTO {orders_table} VALUES(?,?,?,?,?,?,?,?)",
-                            (item[0], item[1], item[2], item[3], item[4], item[5], item[6], current_date))
-                
-                # Record the order in a global orders table
-                cur.execute("INSERT INTO orders(item, price, qty, total, place, rest, dish_image, phone, date, status, approve) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                            (item[0], item[1], item[2], item[3], item[4], item[5], item[6], username, current_date, "new", "Pending"))
-                
-                # Notify managers of the restaurant
-                cur.execute("SELECT * FROM managers WHERE username=?", (item[5],))
+                cur.execute(f"""
+                    INSERT INTO {orders_table} 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (*item, current_date)
+                )
+
+                # Fetch contact details of the restaurant manager
+                cur.execute("SELECT phone FROM managers WHERE name = ?", (item[5],))
                 manager = cur.fetchone()
-                # if manager:
-                #     if len(manager) > 8:
-                #         manager_email = manager[8]
-                #         msg = Message('New Order Notification', recipients=[manager_email])
-                #         msg.html = """
-                #             <html>
-                #             <body>
-                #             <h3>TastyHub</h3>
-                #             <p>You have a new order. <a href='http://localhost:5000/m_orders>'<button> View Order(s)</button></a></p>
-                #             </body>
-                #             </html>
-                #         """
-                #         mail.send(msg)
-                #     else:
-                #         print(f"Error: Manager record for {item[5]} is incomplete.")
-                # else:
-                #     print(f"No manager found for username {item[5]}.")
-                
-                # Update most ordered table
-                cur.execute("SELECT * FROM most_ordered WHERE place=? AND rest=? AND item=?",(item[4], item[5], item[0],))
+                contact = manager[0] if manager else None
+
+                # Record the order in a global orders table
+                cur.execute("""
+                    INSERT INTO orders 
+                    (item, price, qty, total, place, rest, dish_image, phone, date, status, approve, contact) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (item[0], item[1], item[2], item[3], item[4], item[5], item[6], phone, current_date, "new", "Pending", contact)
+                )
+
+                # Update the most ordered table
+                cur.execute("""
+                    SELECT * FROM most_ordered 
+                    WHERE place = ? AND rest = ? AND item = ?""",
+                    (item[4], item[5], item[0])
+                )
                 check = cur.fetchone()
+
                 if check:
-                    cur.execute("UPDATE most_ordered SET orders=orders+? WHERE place=? AND rest=? AND item=?",
-                                (item[2], item[4], item[5], item[0],))
+                    cur.execute("""
+                        UPDATE most_ordered 
+                        SET orders = orders + ? 
+                        WHERE place = ? AND rest = ? AND item = ?""",
+                        (item[2], item[4], item[5], item[0])
+                    )
                 else:
-                    cur.execute("INSERT INTO most_ordered VALUES(?,?,?,?,?,?)",
-                                (item[4], item[5], item[0], item[2], item[6], item[1],))
-            
+                    cur.execute("""
+                        INSERT INTO most_ordered 
+                        (place, rest, item, orders, dish_image, price) 
+                        VALUES (?, ?, ?, ?, ?, ?)""",
+                        (item[4], item[5], item[0], item[2], item[6], item[1])
+                    )
+
             # Record confirmation response
-            cur.execute("INSERT INTO response VALUES(?,?,?,?)", (username, 'confirmation', 'order confirmed', 'admin',))
-            
+            cur.execute("""
+                INSERT INTO response 
+                (username, type, message, sender) 
+                VALUES (?, ?, ?, ?)""",
+                (username, 'confirmation', 'Order confirmed', 'admin')
+            )
+
             # Clear the user's cart
             cur.execute(f"DELETE FROM _{username}")
-        
+
     except sqlite3.Error as e:
         print(f"SQLite error in cartclear: {e}")
     
     return redirect(url_for('orders'))
-
 
 
 #when user wants to see past orders

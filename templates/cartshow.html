@@ -255,7 +255,7 @@
 			
 		<td class="name">{{x[0]}}</td>
 		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span>{{x[1]}}</td>
-		<td class="quantity">{{ x[2] }} <a href="{{ url_for('add_quantity', id=x[7]) }}"><button>+</button></a><a href="{{ url_for('remove_quantity', id=x[7]) }}"><button>-</button></a></td>
+		<td class="quantity">{{ x[2] }} <a href="{{ url_for('add_quantity', id=x[0]) }}"><button>+</button></a><a href="{{ url_for('remove_quantity', id=x[0]) }}"><button>-</button></a></td>
 
 		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[3]}}</td>
 		<td class=""><a class="removea" href="/cartremove/{{x[0]}}/{{x[4]}}/{{x[5]}}/{{x[2]}}">remove</a></td>

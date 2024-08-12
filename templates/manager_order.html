@@ -463,6 +463,7 @@
 	
 	<table  class="table table-striped">
 	<tr >
+    <td>Order</td>
 		<td></td>
 		<td></td>
 		<td>price</td>
@@ -479,18 +480,23 @@
 	<tr  >
 		
 	<td rowspan='3' class="photo" ><img src="{{url_for('static',filename='dish/'+x[6])}}" height="70" width="100" onerror="this.src='{{url_for('static',filename='noimage.png')}}'"></td>
-			
+		<td class="name">#{{x[11]}}</td>	
 		<td class="name">{{x[0]}}</td>
 		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[1]}}</td>
 		<td class="quantity">{{x[2]}}</td>
 		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[3]}}</td>
 		<td style="font-weight: bold;">{{x[8]}}</td>
-		{% if x[10] == "Approved" %}
-		<td style="font-weight: bold; color: green;">{{ x[10] }}</td>
-	{% else %}
-		<td style="font-weight: bold; color: orangered;">{{ x[10] }}</td>
-	{% endif %}
-	
+    {% if x[10] == "Approved" %}
+    <td style="font-weight: bold; color: green;">{{ x[10] }}</td>
+{% elif x[10] == "Dispatched" %}
+    <td style="font-weight: bold; color: yellowgreen;">{{ x[10] }}</td>
+{% elif x[10] == "Delivered" %}
+    <td style="font-weight: bold; color: green;">{{ x[10] }}</td>
+{% else %}
+    <td style="font-weight: bold; color: orangered;">{{ x[10] }}</td>
+{% endif %}
+
+
 		<td>
 			{% if x[10] == "Pending" %}
 			<a href="{{ url_for('approve_order', id=x[11]) }}"><button class="btn" style="background-color: green;">Approve</button></a>	
@@ -498,7 +504,9 @@
 			{% elif x[10] == "Approved" %}
 				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
 				<a href="{{ url_for('cancel_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>	
-			{% else %}
+        <a href="{{ url_for('disptach_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Dispatched</button></a>	
+        <a href="{{ url_for('deliver_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Delivered</button></a>	
+        {% else %}
 				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
 				<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
 			{% endif %}

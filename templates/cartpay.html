@@ -25,9 +25,7 @@
 <script>
 function required()
 {
-var name=document.forms["form1"]["name"].value;
-// var pincode=document.forms["form1"]["pincode"].value;
-var address=document.forms["form1"]["address"].value;
+
 // var phone=document.forms["form1"]["phone"].value;
 var payment=document.forms["form1"]["payment"].value;
 
@@ -209,30 +207,21 @@ input#gobutton:hover, input#gobutton:focus
 	<br><br>
 	<br><br>
 	<div class="content1">
-		<div class="content2">
-				Enter shipping address
-		</div>
+		
 		<hr width="100%">
 			<br>
 			<form name='form1' onsubmit='required()'>
 				<table>
 				<tr>
-				<td><span class="heading">Name</span></td>
-				<td><input class="input_name" type='text' name='name' required></td></tr>
-				<!-- <tr>
-				<td><span class="heading">Pincode</span></td>
-				<td><input class="input_name" type='number' name='pincode'  required></td></tr>
-				<tr> -->
-				<td><span class="heading">Address</span></td>
-				<td><textarea class="input_address" type='text' name='address' cols="40" rows="5" required></textarea></td></tr>
-				<tr>
-				<td><span class="heading">Landmark</span></td>
-				<td><input class="input_name" type='text' name='landmark' placeholder="(optional)"></td></tr>
+				
+			
+				<tr> 
+			
 				<!-- <tr>
 				<td><span class="heading">Phone</span></td>
 				<td><input class="input_name" type='number' name='phone' min="1000000000" max="9999999999" required></td></tr>
 				<tr> -->
-				<td><span class="heading">Payment</span></td>
+				<td><span class="heading">Payment Method</span></td>
 				<td><select class="select" name="payment">
 					<option value="card">Pay Using Debit Card</option>
 					<option value="cash">Pay By Cash On Delivery</option>
