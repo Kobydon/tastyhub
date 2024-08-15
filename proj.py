@@ -879,7 +879,7 @@ def menu(place,rest):
 
 		conn=sqlite3.connect('members.db')
 		cur=conn.cursor()
-		cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
+		cur.execute("SELECT * FROM managers WHERE place=? AND name=?",(place,rest,))
 		temp=cur.fetchone()
 		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
 		var_stars=cur.fetchone()

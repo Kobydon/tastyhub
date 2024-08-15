@@ -310,8 +310,8 @@
 			<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
 			<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
 		{% endif %}
-
-	<a href="tel:{{x[11]}}"><button class="btn btn-info" >Contact Restaurant</button></a>	
+		<a href="tel:{{x[6]}}"><button class="btn btn-info" >Order Again</button></a>	
+	<a  href="{{ url_for('menu', place=x[4], rest=x[11]) }}"><button class="btn btn-info" >Contact Restaurant</button></a>	
 	</td>
 	
 	</tr>
