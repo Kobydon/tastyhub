@@ -1545,10 +1545,11 @@ def paycard():
 #clear items in cart
 
 
+
 @app.route('/cartclear')
 def cartclear():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if user not logged in
+        return redirect(url_for('login'))  # Redirect to login if user is not logged in
 
     username = session['username']
     orders_table = f"_{username}_orders"
@@ -1558,43 +1559,45 @@ def cartclear():
         with sqlite3.connect('members.db') as conn:
             cur = conn.cursor()
 
-            # Backup cart items to user's orders history
+            # Fetch cart items
             cur.execute(f"SELECT * FROM _{username}")
             cart_items = cur.fetchall()
 
             if not cart_items:
                 print("No items found in the cart.")
             
-            # Fetch the phone number of the user
+            # Fetch user details
             cur.execute("SELECT * FROM customers WHERE username = ?", (username,))
             user = cur.fetchone()
             phone = user[3] if user else None
 
             for item in cart_items:
-                # Debug output for item
+                # Debug output for each item
                 print(f"Inserting item into orders_table: {item}")
 
                 # Move items to orders history
                 cur.execute(f"""
                     INSERT INTO {orders_table} 
+                    (item, price, qty, total, place, rest, dish_image, date) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                     (*item, current_date)
                 )
 
-                # Fetch contact details of the restaurant manager
+                # Fetch manager contact details
                 cur.execute("SELECT * FROM managers WHERE name = ?", (item[5],))
                 manager = cur.fetchone()
                 contact = manager[5] if manager else None
-	
-                # Record the order in a global orders table
+                manager_username = manager[0] if manager else None
+
+                # Record the order in the global orders table
                 cur.execute("""
                     INSERT INTO orders 
-                    (item, price, qty, total, place, rest, dish_image, phone, date, status, approve, contact,username) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)""",
-                    (item[0], item[1], item[2], item[3], item[4], item[5], item[6], phone, current_date, "new", "Pending", contact,manager[0])
+                    (item, price, qty, total, place, rest, dish_image, phone, date, status, approve, contact, username) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (item[0], item[1], item[2], item[3], item[4], item[5], item[6], phone, current_date, "new", "Pending", contact, manager_username)
                 )
 
-                # Update the most ordered table
+                # Update the most ordered items table
                 cur.execute("""
                     SELECT * FROM most_ordered 
                     WHERE place = ? AND rest = ? AND item = ?""",
@@ -1616,14 +1619,6 @@ def cartclear():
                         VALUES (?, ?, ?, ?, ?, ?)""",
                         (item[4], item[5], item[0], item[2], item[6], item[1])
                     )
-
-            # Record confirmation response (uncomment if needed)
-            # cur.execute("""
-            #     INSERT INTO response 
-            #     (username, type, message, sender) 
-            #     VALUES (?, ?, ?, ?)""",
-            #     (username, 'confirmation', 'Order confirmed', 'admin')
-            # )
 
             # Clear the user's cart
             cur.execute(f"DELETE FROM _{username}")
