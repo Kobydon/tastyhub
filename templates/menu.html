@@ -480,7 +480,7 @@ LTastyHub</span>
 	<div class="name">
 		<div class="zoom-effect-container">
 		<div class="image-card">
-		<a class="image_linka" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">
+		<a class="image_linka" href="/{{x[3]}}/menu/{{x[0]}}">
 		<img class="image_link" src="{{url_for('static',filename='dish/'+x['dish_image'])}}" height="150" width="250">
 		</a>	
 		</div>
@@ -504,7 +504,7 @@ LTastyHub</span>
 	<br>
 
 	<div class="ordernow">
-	<a class="ordernowa" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">order online &rarr; </a>
+	<a class="ordernowa" href="/{{x[3]}}/menu/{{x[0]}}">order online &rarr; </a>
 	</div>
 
 	</div>
