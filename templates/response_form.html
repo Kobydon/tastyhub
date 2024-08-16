@@ -15,7 +15,7 @@ function required()
 	var message=document.forms["form1"]["message"].value;
 	alertify.log( "response sent to {{username}}", "success" );
 
-	document.form1.action="http://localhost:5000/response/{{username}}/{{sub}}";	
+	document.form1.action="https://tastyhub-jpjp.onrender.com/response/{{username}}/{{sub}}";	
 	document.form1.method="post";
 	
 }

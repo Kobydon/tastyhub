@@ -15,7 +15,7 @@ function required()
 	var message=document.forms["form1"]["message"].value;
 	alertify.log( "notification to sent to {{rest}}", "success" );
 
-	document.form1.action="http://localhost:5000/notification/{{place}}/{{rest}}";	
+	document.form1.action="https://tastyhub-jpjp.onrender.com/notification/{{place}}/{{rest}}";	
 	document.form1.method="post";
 	
 }
