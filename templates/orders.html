@@ -293,7 +293,7 @@
 				<td style="font-weight: bold; color: {% if order[10] == 'Approved' %}green{% elif order[10] == 'Dispatched' %}lightblue{% elif order[10] == 'Delivered' %}green{% else %}orangered{% endif %};">
 					{{ order[10] }}
 				</td>
-				<td>{{order[4]}}</td>
+				<td>{{order[5]}}</td>
 				<td>
 					{% if order[10] == 'Pending' %}
 						<a href="{{ url_for('cancel_order_customer', id=order[11]) }}">
