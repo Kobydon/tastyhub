@@ -869,11 +869,11 @@ def menu(place,rest):
 	cur.execute("SELECT COUNT(*) FROM {}".format(rest))
 	var=cur.fetchone()
 	if(var['count(*)']>0):	#since row_factory=Row,col name is used
-		cur.execute("SELECT * FROM {} WHERE category='veg'".format(rest)) 
+		cur.execute("SELECT * FROM {} ".format(rest)) 
 		var_veg=cur.fetchall()
-		cur.execute("SELECT * FROM {} WHERE category='non-veg'".format(rest)) 
+		cur.execute("SELECT * FROM {} ".format(rest)) 
 		var_non_veg=cur.fetchall()
-		cur.execute("SELECT * FROM {} WHERE category='others'".format(rest)) 
+		cur.execute("SELECT * FROM {} ".format(rest)) 
 		var_others=cur.fetchall()
 		conn.close()
 
