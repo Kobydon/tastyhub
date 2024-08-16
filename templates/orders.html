@@ -266,68 +266,57 @@
 	<div class="shopping">
 	 Orders
 	</div>
-	
 	<table class="table table-striped">
-	<tr class="heading">
-		<td>Order</td>
-		<td></td>
-		<td></td>
-		<td>price</td>
-		<td>quantity</td>
-		<td>subtotal</td>
-		<td>date | time</td>
-		<td>Status</td>
-		<td>action</td>
-		
-	</tr>	
-	<tr>
-	{% for x in var %}
+		<thead>
+			<tr class="heading">
+				<th>Dish</th>
+				<th>Price</th>
+				<th>Quantity</th>
+				<th>Subtotal</th>
+				<th>Date | Time</th>
+				<th>Status</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for order in orders %}
+			<tr>
+				<td class="photo">
+					<img src="{{ url_for('static', filename='dish/' + order[6]) }}" height="70" width="100" onerror="this.src='{{ url_for('static', filename='noimage.png') }}'">
+				</td>
+				<td>GH₵ {{ order[1] }}</td>
+				<td>{{ order[2] }}</td>
+				<td>GH₵ {{ order[3] }}</td>
+				<td>{{ order[8] }}</td>
+				<td style="font-weight: bold; color: {% if order[10] == 'Approved' %}green{% elif order[10] == 'Dispatched' %}lightblue{% elif order[10] == 'Delivered' %}green{% else %}orangered{% endif %};">
+					{{ order[10] }}
+				</td>
+				<td>
+					{% if order[10] == 'Pending' %}
+						<a href="{{ url_for('cancel_order_customer', id=order[11]) }}">
+							<button class="btn" style="background-color: orangered;">Cancel</button>
+						</a>
+					{% elif order[10] == 'Approved' %}
+						<button class="btn" style="background-color: green;" disabled>Processed</button>
+					{% elif order[10] == 'Delivered' %}
+						<button class="btn" style="background-color: orangered;" disabled>Cancel</button>
+					{% else %}
+						<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
+					{% endif %}
+					
+					<a href="/{{order[4]}}/menu/{{order[13]}}">
+						<button class="btn btn-info">Order Again</button>
+					</a>
+					<a href="tel:{{ order[12] }}">
+						<button class="btn btn-success">Contact Restaurant</button>
+					</a>
+				</td>
+				
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 	
-	<tr >
-		
-	<td rowspan='3' class="photo" ><img src="{{url_for('static',filename='dish/'+x[6])}}" height="70" width="100" onerror="this.src='{{url_for('static',filename='noimage.png')}}'"></td>
-	<td >#{{x[11]}}</td>	
-		<td class="name">{{x[0]}}</td>
-		<td class="price" style="font-family:'Cormorant Garamond Medium'"> GH₵ {{x[1]}}</td>
-		<td class="quantity">{{x[2]}}</td>
-		<td class="price"  style="font-family:'Cormorant Garamond Medium'">GH₵ {{x[3]}}</td>
-		<td style="font-weight: bold;">{{x[8]}}</td>
-		{% if x[10] == "Approved" %}
-		<td style="font-weight: bold; color: green;">{{ x[10] }}</td>
-	{% else %}
-		<td style="font-weight: bold; color: orangered;">{{ x[10] }}</td>
-	{% endif %}
-	
-
-	<td>
-		{% if x[10] == "Pending" %}
-		<!-- <a href="{{ url_for('approve_order', id=x[0]) }}"><button class="btn" style="background-color: green;">Approve</button></a>	 -->
-		<a href="{{ url_for('cancel_order_customer', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>		
-		{% elif x[10] == "Approved" %}
-			<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
-			<button class="btn" style="background-color: green;" disabled>Processed</button>
-		{% else %}
-			<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
-			<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
-		{% endif %}
-		<a href="tel:{{x[6]}}"><button class="btn btn-info" >Order Again</button></a>	
-	<a  href="{{ url_for('menu', place=x[4], rest=x[11]) }}"><button class="btn btn-info" >Contact Restaurant</button></a>	
-	</td>
-	
-	</tr>
-	<tr>
-		<!-- <td class="place">Restaurant {{x[5]}}</td> -->
-		
-	</tr>
-	<tr>
-
-		<!-- <td class="stock">In stock</td> -->
-	</tr>
-	</tr>	
-
-{% endfor %}
-
-</table>
 <br>
 
 <br>

@@ -869,7 +869,7 @@ def menu(place,rest):
 	cur.execute("SELECT COUNT(*) FROM {}".format(rest))
 	var=cur.fetchone()
 	if(var['count(*)']>0):	#since row_factory=Row,col name is used
-		cur.execute("SELECT * FROM {} ".format(rest)) 
+		cur.execute("SELECT * FROM {} WHERE category='veg'".format(rest)) 
 		var_veg=cur.fetchall()
 		cur.execute("SELECT * FROM {} WHERE category='non-veg'".format(rest)) 
 		var_non_veg=cur.fetchall()
@@ -879,7 +879,7 @@ def menu(place,rest):
 
 		conn=sqlite3.connect('members.db')
 		cur=conn.cursor()
-		cur.execute("SELECT * FROM managers WHERE place=? AND name=?",(place,rest,))
+		cur.execute("SELECT * FROM managers WHERE place=? AND username=?",(place,rest,))
 		temp=cur.fetchone()
 		cur.execute("SELECT stars FROM rating WHERE place=? AND rest=? AND username=?",(place,rest,session['username'],))
 		var_stars=cur.fetchone()
@@ -900,8 +900,6 @@ def menu(place,rest):
 		#from menu.html , goes to /quantity/<item>/<price>
 	else:
 		return render_template('nomenu.html',place=place)
-
-
 #rating..
 @app.route('/<place>/<rest>/rating/<stars>')		
 def rating(place,rest,stars):
@@ -1099,17 +1097,53 @@ def quantity(place,rest,item,price,dish_image):
 
 
 
-#to insert quantity in CART table
-@app.route('/postquantity/<place>/<rest>/<item>/<price>/<dish_image>',methods=['GET','POST'])
-def postquantity(place,rest,item,price,dish_image):
-	conn=sqlite3.connect('members.db')
-	cur=conn.cursor()
-	qty=request.form['qty']
-	var=int(price)*int(qty)
-	cur.execute("INSERT INTO {}(item,price,qty,total,place,rest,dish_image) VALUES(?,?,?,?,?,?,?); ".format("_"+session['username']) ,(item,price,qty,var,place,rest,dish_image,))
-	conn.commit()
-	conn.close()
-	return redirect(url_for('homepage_customer'))
+#to inser
+
+@app.route('/postquantity/<place>/<rest>/<item>/<price>/<dish_image>', methods=['POST'])
+def postquantity(place, rest, item, price, dish_image):
+    conn = sqlite3.connect('members.db')
+    conn.row_factory = sqlite3.Row  # Set row factory to access columns by name
+    cur = conn.cursor()
+    
+    # Get the quantity from the form
+    qty = int(request.form.get('qty', 0))  # Default to 0 if not provided
+    total_price = int(price) * qty
+    
+    # Dynamically get the table name
+    table_name = f"_{session['username']}"
+    
+    # Check if the item already exists in the table
+    cur.execute(f"SELECT * FROM {table_name} WHERE item = ? AND place = ? AND rest = ?", (item, place, rest))
+    existing_item = cur.fetchone()
+    
+    if existing_item:
+        # Convert existing qty and total to integers
+        existing_qty = int(existing_item['qty'])
+        existing_total = int(existing_item['total'])
+        
+        # Update the existing record
+        new_qty = existing_qty + qty
+        new_total = existing_total + total_price
+        
+        cur.execute(f"""
+            UPDATE {table_name}
+            SET qty = ?, total = ?
+            WHERE item = ? AND place = ? AND rest = ?
+        """, (new_qty, new_total, item, place, rest))
+    else:
+        # Insert a new record
+        cur.execute(f"""
+            INSERT INTO {table_name} (item, price, qty, total, place, rest, dish_image)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (item, price, qty, total_price, place, rest, dish_image))
+    
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+    
+    # Redirect to homepage or another page
+    return redirect(url_for('homepage_customer'))
+
 
 @app.route("/add_quantity/<id>")
 def add_quantity(id):
@@ -1510,9 +1544,6 @@ def paycard():
 
 #clear items in cart
 
-from flask import Flask, session, redirect, url_for
-import sqlite3
-from datetime import datetime
 
 @app.route('/cartclear')
 def cartclear():
@@ -1531,12 +1562,18 @@ def cartclear():
             cur.execute(f"SELECT * FROM _{username}")
             cart_items = cur.fetchall()
 
+            if not cart_items:
+                print("No items found in the cart.")
+            
             # Fetch the phone number of the user
-            cur.execute("SELECT phone FROM managers WHERE username = ?", (username,))
+            cur.execute("SELECT * FROM customers WHERE username = ?", (username,))
             user = cur.fetchone()
-            phone = user[0] if user else None
+            phone = user[3] if user else None
 
             for item in cart_items:
+                # Debug output for item
+                print(f"Inserting item into orders_table: {item}")
+
                 # Move items to orders history
                 cur.execute(f"""
                     INSERT INTO {orders_table} 
@@ -1545,16 +1582,16 @@ def cartclear():
                 )
 
                 # Fetch contact details of the restaurant manager
-                cur.execute("SELECT phone FROM managers WHERE name = ?", (item[5],))
+                cur.execute("SELECT * FROM managers WHERE name = ?", (item[5],))
                 manager = cur.fetchone()
-                contact = manager[0] if manager else None
-
+                contact = manager[5] if manager else None
+	
                 # Record the order in a global orders table
                 cur.execute("""
                     INSERT INTO orders 
-                    (item, price, qty, total, place, rest, dish_image, phone, date, status, approve, contact) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (item[0], item[1], item[2], item[3], item[4], item[5], item[6], phone, current_date, "new", "Pending", contact)
+                    (item, price, qty, total, place, rest, dish_image, phone, date, status, approve, contact,username) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)""",
+                    (item[0], item[1], item[2], item[3], item[4], item[5], item[6], phone, current_date, "new", "Pending", contact,manager[0])
                 )
 
                 # Update the most ordered table
@@ -1580,13 +1617,13 @@ def cartclear():
                         (item[4], item[5], item[0], item[2], item[6], item[1])
                     )
 
-            # Record confirmation response
-            cur.execute("""
-                INSERT INTO response 
-                (username, type, message, sender) 
-                VALUES (?, ?, ?, ?)""",
-                (username, 'confirmation', 'Order confirmed', 'admin')
-            )
+            # Record confirmation response (uncomment if needed)
+            # cur.execute("""
+            #     INSERT INTO response 
+            #     (username, type, message, sender) 
+            #     VALUES (?, ?, ?, ?)""",
+            #     (username, 'confirmation', 'Order confirmed', 'admin')
+            # )
 
             # Clear the user's cart
             cur.execute(f"DELETE FROM _{username}")
@@ -1604,40 +1641,81 @@ def cartclear():
 #when user wants to see past orders
 @app.route('/orders')
 def orders():
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-    temp = "_" + session['username'] + '_orders'
-    cur.execute("SELECT * FROM orders WHERE	phone=? ORDER BY date DESC", (session['username'],))
-    var = cur.fetchall()
-    conn.close()
-    
-    if var:
-        return render_template('orders.html', var=var)
+    # Ensure the username is available in the session
+    username = session.get('username', '')
+    if not username:
+        return "User not logged in", 401  # Unauthorized if no username in session
+
+    try:
+        # Connect to the database
+        with sqlite3.connect('members.db') as conn:
+            cur = conn.cursor()
+            
+            # Fetch the customer's details using their username
+            cur.execute("SELECT * FROM customers WHERE username = ?", (username,))
+            customer = cur.fetchone()
+            
+            if not customer:
+                # Handle case where customer is not found
+                return "Customer not found", 404
+            
+            # Extract the restaurant identifier
+            restaurant_id = customer[3]
+            print(f"Restaurant ID: {restaurant_id}")
+            
+            # Retrieve orders for the customer, ordered by date in descending order
+            cur.execute("SELECT * FROM orders WHERE phone = ? ORDER BY date DESC", (restaurant_id,))
+            orders = cur.fetchall()
+
+    except sqlite3.Error as e:
+        print(f"SQLite error in orders: {e}")
+        return "Database error", 500
+
+    # Render the orders page with the retrieved data
+    if orders:
+        return render_template('orders.html', orders=orders)
     else:
         return render_template('no_orders.html')
-
 
 @app.route('/m_orders')
 def m_orders():
     status = 'new'
-    conn = sqlite3.connect('members.db')
-    cur = conn.cursor()
-    cur.execute("UPDATE orders SET status = 'old' WHERE rest = ?", (session['username'],))
-    conn.commit()
-    # Retrieve orders for the current restaurant manager (assuming session['username'] is set)
-    cur.execute("SELECT * FROM orders WHERE rest = ? ORDER BY date DESC", (session['username'],))
-    var = cur.fetchall()
     
-    # Count new orders for the current restaurant manager
-    cur.execute("SELECT count(*) FROM orders WHERE status=? AND rest=?", (status, session['username']))
-    new_orders = cur.fetchone()[0]
+    try:
+        # Connect to the database
+        with sqlite3.connect('members.db') as conn:
+            cur = conn.cursor()
+            
+            # Fetch the current manager's details using their username from the session
+            cur.execute("SELECT * FROM managers WHERE username = ?", (session.get('username', ''),))
+            manager = cur.fetchone()
+            
+            if not manager:
+                # Handle case where manager is not found
+                return "Manager not found", 404
+            
+            # Extract the restaurant identifier
+            restaurant_id = manager[5]
+            print(f"Restaurant ID: {restaurant_id}")
+            
+            # Update the status of existing orders to 'old' for the current restaurant
+            cur.execute("UPDATE orders SET status = 'old' WHERE rest = ?", (session["username"],))
+            conn.commit()
+            
+            # Retrieve orders for the current restaurant, ordered by date in descending order
+            cur.execute("SELECT * FROM orders WHERE username = ? ORDER BY date DESC", (session["username"],))
+            orders = cur.fetchall()
+            
+            # Count the number of new orders for the current restaurant
+            cur.execute("SELECT count(*) FROM orders WHERE username = ? AND rest = ?", (status, session["username"]))
+            new_orders_count = cur.fetchone()[0]
+
+    except sqlite3.Error as e:
+        print(f"SQLite error in m_orders: {e}")
+        return "Database error", 500
     
-    conn.close()
-    
-    if var:
-        return render_template('manager_order.html', var=var, new_orders=new_orders)
-    else:
-        return render_template('manager_order.html', var=var, new_orders=new_orders)
+    # Render the manager's orders page with the retrieved orders and new orders count
+    return render_template('manager_order.html', orders=orders, new_orders=new_orders_count)
 
 
 
@@ -1853,7 +1931,7 @@ def manager_menu(place,username):
 	total_stars=cur.fetchall()
 	cur.execute("SELECT count(*) FROM rating WHERE place=? AND rest=?",(place,username,))
 	count=cur.fetchone()
-	cur.execute("SELECT count(*) FROM orders WHERE status=? AND rest=?",(status,username,))
+	cur.execute("SELECT count(*) FROM orders WHERE status=? AND username=?",(status,username,))
 	new_orders =cur.fetchone()[0]
 	conn.close()
 	sum=0

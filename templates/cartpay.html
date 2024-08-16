@@ -34,11 +34,11 @@ var payment=document.forms["form1"]["payment"].value;
 	if(payment=='cash')
 	{
 		alertify.log( "order successfully placed ", "success" );
-		document.form1.action="https://tastyhub-jpjp.onrender.com/cartclear";
+		document.form1.action="http://localhost:5000/cartclear";
 	}
 	else
 	{
-		document.form1.action="https://tastyhub-jpjp.onrender.com/paycard";
+		document.form1.action="http://localhost:5000/paycard";
 
 	}
 

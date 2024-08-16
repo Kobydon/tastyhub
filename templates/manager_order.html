@@ -461,71 +461,86 @@
 	  Orders
 	</div>
 	
-	<table  class="table table-striped">
-	<tr >
-    <td>Order</td>
-		<td></td>
-		<td></td>
-		<td>price</td>
-		<td>quantity</td>
-		<td>subtotal</td>
-		<td>date | time</td>
-		<td>status</td>
-		<td>action</td>
-		
-	</tr>	
-	<tr>
-	{% for x in var %}
-	
-	<tr  >
-		
-	<td rowspan='3' class="photo" ><img src="{{url_for('static',filename='dish/'+x[6])}}" height="70" width="100" onerror="this.src='{{url_for('static',filename='noimage.png')}}'"></td>
-		<td>#{{x[11]}}</td>	
-		<td class="name">{{x[0]}}</td>
-		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[1]}}</td>
-		<td class="quantity">{{x[2]}}</td>
-		<td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{x[3]}}</td>
-		<td style="font-weight: bold;">{{x[8]}}</td>
-    {% if x[10] == "Approved" %}
-    <td style="font-weight: bold; color: green;">{{ x[10] }}</td>
-{% elif x[10] == "Dispatched" %}
-    <td style="font-weight: bold; color: yellowgreen;">{{ x[10] }}</td>
-{% elif x[10] == "Delivered" %}
-    <td style="font-weight: bold; color: green;">{{ x[10] }}</td>
-{% else %}
-    <td style="font-weight: bold; color: orangered;">{{ x[10] }}</td>
-{% endif %}
-
-
-		<td>
-			{% if x[10] == "Pending" %}
-			<a href="{{ url_for('approve_order', id=x[11]) }}"><button class="btn" style="background-color: green;">Approve</button></a>	
-			<a href="{{ url_for('cancel_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>		
-			{% elif x[10] == "Approved" %}
-				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
-				<a href="{{ url_for('cancel_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Cancel</button></a>	
-        <a href="{{ url_for('disptach_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Dispatched</button></a>	
-        <a href="{{ url_for('deliver_order', id=x[11]) }}"><button class="btn" style="background-color: orangered;">Delivered</button></a>	
-        {% else %}
-				<!-- <button class="btn" style="background-color: green;" disabled>Approve</button> -->
-				<button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
-			{% endif %}
-		</td>
-		
-	</tr>
-	<tr>
-		<td class="place">from <a href="tel:{{x[7]}}">{{x[7]}}</a>,{{x[4]}}</td>
-		
-	</tr>
-	<tr>
-
-		<!-- <td class="stock">In stock</td> -->
-	</tr>
-	</tr>	
-
-{% endfor %}
-
+  <table class="table table-striped">
+    <thead>
+        <tr class="heading">
+            <th>Dish</th>
+            <th>Order_id</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Date | Time</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in orders %}
+        <tr>
+            <td rowspan='3' class="photo">
+                <img src="{{ url_for('static', filename='dish/' + x[6]) }}" height="70" width="100" onerror="this.src='{{ url_for('static', filename='noimage.png') }}'">
+                {{x[0]}}
+            </td>
+            <td>#{{ x[1] }}</td>
+            <td class="name">{{ x[2] }}</td>
+            <td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{ x[1] }}</td>
+            <td class="quantity">{{ x[3] }}</td>
+            <td class="price"><span style="font-family:'Cormorant Garamond Medium'">GH₵</span> {{ x[3] }}</td>
+            <td style="font-weight: bold;">{{ x[8] }}</td>
+            <td style="font-weight: bold; color: {% if x[10] == 'Approved' %}green{% elif x[10] == 'Dispatched' %}lightblue{% elif x[10] == 'Delivered' %}green{% else %}orangered{% endif %};">
+                {{ x[10] }}
+            </td>
+            <td>
+              {% if x[10] == "Pending" %}
+                  <a href="{{ url_for('approve_order', id=x[11]) }}">
+                      <button class="btn" style="background-color: green;">Approve</button>
+                  </a>
+                  <a href="{{ url_for('cancel_order', id=x[11]) }}">
+                      <button class="btn" style="background-color: orangered;">Cancel</button>
+                  </a>
+              {% elif x[10] == "Approved" %}
+                  <a href="{{ url_for('cancel_order', id=x[11]) }}">
+                      <button class="btn btn-danger">Cancel</button>
+                  </a>
+                  <a href="{{ url_for('dispatch_order', id=x[11]) }}">
+                      <button class="btn btn-info">Dispatched</button>
+                  </a>
+                  <a href="{{ url_for('deliver_order', id=x[11]) }}">
+                      <button class="btn btn-success">Delivered</button>
+                  </a>
+              {% elif x[10] == "Dispatched" %}
+                  <a href="{{ url_for('cancel_order', id=x[11]) }}">
+                      <button class="btn btn-danger">Cancel</button>
+                  </a>
+                  <a href="{{ url_for('dispatch_order', id=x[11]) }}">
+                      <button class="btn btn-info" disabled>Dispatched</button>
+                  </a>
+                  <a href="{{ url_for('deliver_order', id=x[11]) }}">
+                      <button class="btn btn-success">Delivered</button>
+                  </a>
+              {% elif x[10] == "Delivered" %}
+                  <button class="btn btn-danger" disabled>Cancel</button>
+                  <button class="btn btn-info" disabled>Dispatched</button>
+                  <button class="btn btn-success" disabled>Delivered</button>
+              {% else %}
+                  <button class="btn" style="background-color: orangered;" disabled>Cancelled</button>
+                  <a href="{{ url_for('deliver_order', id=x[11]) }}">
+                      <button class="btn btn-success">Deliver</button>
+                  </a>
+              {% endif %}
+          </td>
+          
+        </tr>
+        <tr>
+            <td colspan="8" class="place">From <a href="tel:{{ x[7] }}">{{ x[7] }}</a>, {{ x[4] }}</td>
+        </tr>
+        <tr>
+            <!-- You can include additional details here if needed, or remove this row if unnecessary -->
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
 <br>
 
 <br>
