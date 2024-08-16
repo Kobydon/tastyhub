@@ -1694,7 +1694,7 @@ def m_orders():
             print(f"Restaurant ID: {restaurant_id}")
             
             # Update the status of existing orders to 'old' for the current restaurant
-            cur.execute("UPDATE orders SET status = 'old' WHERE rest = ?", (session["username"],))
+            cur.execute("UPDATE orders SET status = 'old' WHERE username = ?", (session["username"],))
             conn.commit()
             
             # Retrieve orders for the current restaurant, ordered by date in descending order

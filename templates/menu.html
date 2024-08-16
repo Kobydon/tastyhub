@@ -472,7 +472,7 @@ LTastyHub</span>
 
 	<div class="content2">
 	<br>
-	<span class="heading">NON-VEG</span>
+	<span class="heading"></span>
 	<br>
 	{% for x in var_non_veg %}
 	<!--displays menu of different restaurants -->
@@ -514,98 +514,10 @@ LTastyHub</span>
 
 <br>
 
-{% if (var_veg is defined) and var_veg %}
-<div class="content2">
 
-	<br>
-	<span class="heading">VEG</span>
-	<br>
-	{% for x in var_veg %}
-	<!--displays menu of different restaurants -->
-	<div class="food">
-	<div class="name">
-		<div class="zoom-effect-container">
-		<div class="image-card">
-		<a class="image_linka" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">
-		<img class="image_link" src="{{url_for('static',filename='dish/'+x['dish_image'])}}" height="150" width="250">
-		</a>	
-		</div>
-		</div>
-	</div>
-
-	<div class="price">
-		{{x['item']}}
-	<br>
-	 	</div>
-
-	<div class="desc">
-	{{x['def']}} 
-	<br>
-	</div>
-	<div class="price">
-		GH₵ 
-	<span style="font-family:'Times New Roman'; font-size:18px;"> {{x['price']}}</span>
-	</div>
-	<br>
-
-	<div class="ordernow">
-	<a class="ordernowa" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">order online &rarr; </a>
-	</div>
-
-	</div>
-	{% endfor %}
-	</div>
  
-{%endif%}
 
 
-
-
-<br>
-
-{% if (var_others is defined) and var_others %}
-	<div class="content2">
-
-	<br>
-	<span class="heading">OTHERS</span>
-	<br>
-	{% for x in var_others %}
-	<!--displays menu of different restaurants -->
-	<div class="food">
-	<div class="name">
-		<div class="zoom-effect-container">
-		<div class="image-card">
-		<a class="image_linka" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">
-		<img class="image_link" src="{{url_for('static',filename='dish/'+x['dish_image'])}}" height="150" width="250">
-		</a>	
-		</div>
-		</div>	
-	</div>
-
-	<div class="price">
-		{{x['item']}}
-	<br>
-	 
-	</div>
-
-	<div class="desc">
-	{{x['def']}} 
-	<br>
-	</div>
-	<div class="price">
-		GH₵
-	<span style="font-family:'Times New Roman'; font-size:18px;"> {{x['price']}}</span>
-	</div>
-	<br>
-
-	<div class="ordernow">
-	<a class="ordernowa" href="/quantity/{{place}}/{{rest}}/{{x['item']}}/{{x['price']}}/{{x['dish_image']}}">order online &rarr; </a>
-	</div>
-
-	</div>
-	{% endfor %}
-	</div> 
-{% endif %}
 
 
 <br>
